@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Serv-list · Servicios</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">Serv-list</a>
+      <nav class="nav">
+        <a href="index.html" class="active">Buscar</a>
+        <a href="prestador.html">Prestador</a>
+        <a href="publicar-servicio.html" class="btn">Publicar</a>
+        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Encontrá servicios</h1>
+    <p class="muted">Buscá por categoría y ubicación.</p>
+
+    <form id="form-busqueda" class="search">
+      <label>
+        <span>Categoría</span>
+        <select name="categoria">
+          <option value="">Todas</option>
+          <option>Electricista</option>
+          <option>Plomería</option>
+          <option>Carpintería</option>
+          <option>Limpieza</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Ubicación</span>
+        <select name="ubicacion">
+          <option value="">Cualquier lugar</option>
+          <option>Córdoba</option>
+          <option>Buenos Aires</option>
+          <option>Rosario</option>
+          <option>Mendoza</option>
+        </select>
+      </label>
+
+      <label class="grow">
+        <span>Palabra clave</span>
+        <input type="search" name="q" placeholder="ej. cambio de llave térmica" />
+      </label>
+
+      <button type="submit" class="btn">Buscar</button>
+    </form>
+
+    <section id="resultados" class="grid" aria-live="polite"></section>
+    <p id="sin-resultados" class="muted" style="display:none;">No encontramos servicios con esos filtros.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingenieria y Calidad de Software</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

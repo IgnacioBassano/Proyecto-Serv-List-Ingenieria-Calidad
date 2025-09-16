@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Publicar servicio · Serv-list</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">Serv-list</a>
+      <nav class="nav">
+        <a href="index.html">Buscar</a>
+        <a href="prestador.html?id=1">Prestador</a>
+        <a href="publicar-servicio.html" class="btn active">Publicar</a>
+        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Publicar un nuevo servicio</h1>
+    <form class="form" id="form-publicar">
+      <label>
+        <span>Nombre completo</span>
+        <input type="text" name="titulo" placeholder="Ej. Juan Pérez" required />
+      </label>
+
+      <label>
+        <span>Categoría</span>
+        <select name="categoria" required>
+          <option value="">Seleccionar...</option>
+          <option>Electricista</option>
+          <option>Plomería</option>
+          <option>Carpintería</option>
+          <option>Limpieza</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Ubicación</span>
+        <select name="ubicacion" required>
+          <option value="">Seleccionar...</option>
+          <option>Córdoba</option>
+          <option>Buenos Aires</option>
+          <option>Rosario</option>
+          <option>Mendoza</option>
+        </select>
+      </label>
+
+      <label class="grow">
+        <span>Email de contacto</span>
+        <input type="email" name="email" placeholder="ejemplo@correo.com" required />
+      </label>
+
+      <label class="grow">
+        <span>Comentario breve</span>
+        <input type="text" name="comentario" placeholder="Ej. Instalaciones rápidas y seguras" required />
+      </label>
+
+      <label class="grow">
+        <span>Descripción detallada</span>
+        <textarea name="descripcion" rows="4" placeholder="Contá tu experiencia, certificaciones, y cómo trabajás..." required></textarea>
+      </label>
+
+      <label class="grow">
+        <span>Servicios que ofrecés (separados por coma)</span>
+        <input type="text" name="items" placeholder="Ej. Instalaciones eléctricas, Reparación de enchufes, Mantenimiento" />
+      </label>
+
+      <label class="grow">
+        <span>URL de imagen (opcional)</span>
+        <input type="url" name="imagen" placeholder="https://... o /assets/archivo.jpg" />
+      </label>
+
+      <button class="btn" type="submit">Publicar</button>
+    </form>
+
+    <p id="publicado-ok" class="muted" style="display:none;">¡Servicio publicado!</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingenieria y Calidad de Software</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

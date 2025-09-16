@@ -1,0 +1,49 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Servicio {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  categoria   String
+  ubicacion   String
+  comentario  String
+  imagen      String
+  email       String?
+  descripcion String?
+  rating      Float?   @default(4.0)
+
+  items       ServicioItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([ubicacion])
+  // opcional:
+  // @@index([categoria, ubicacion])
+}
+
+model ServicioItem {
+  id         Int       @id @default(autoincrement())
+  nombre     String
+  servicio   Servicio  @relation(fields: [servicioId], references: [id], onDelete: Cascade)
+  servicioId Int
+}
+
+model Turno {
+  id         Int      @id @default(autoincrement())
+  servicioId Int?
+  nombre     String
+  email      String
+  fecha      DateTime?
+  detalle    String?
+
+  createdAt  DateTime @default(now())
+}
