@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mi Perfil · Serv-list</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">Serv-list</a>
+      <nav class="nav">
+        <a href="index.html">Buscar</a>
+        <a href="perfil.html" class="active">Mi Perfil</a>
+        <a href="publicar-servicio.html" class="btn">Publicar</a>
+        <a href="iniciar-sesion.html">Cerrar Sesión</a>
+        
+        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container perfil-container">
+    <h1>Mi Perfil</h1>
+
+    <div class="tabs">
+  <button class="perfil-tab active" data-tab="datos">Datos personales</button>
+  <button class="perfil-tab" data-tab="reseñas">Reseñas</button>
+  <button class="perfil-tab" data-tab="servicios">Servicios</button>
+</div>
+
+    <div class="tab-content active" id="datos">
+      <h2>Datos personales</h2>
+      <form class="perfil-form">
+        <label>Nombre completo:</label>
+        <input type="text" value="Juan Pérez" />
+        <label>Email:</label>
+        <input type="email" value="juan@example.com" />
+        <label>Teléfono:</label>
+        <input type="tel" value="+54 9 341 1234567" />
+        <button type="submit">Guardar cambios</button>
+      </form>
+    </div>
+
+    <div class="tab-content" id="reseñas">
+      <h2>Reseñas recibidas</h2>
+      <div class="review">
+        <p><strong>María López:</strong> Excelente servicio, muy puntual y profesional.</p>
+        <p>⭐⭐⭐⭐⭐</p>
+      </div>
+      <div class="review">
+        <p><strong>Carlos Gómez:</strong> Buen trabajo, aunque tardó un poco más de lo esperado.</p>
+        <p>⭐⭐⭐⭐</p>
+      </div>
+    </div>
+
+    <div class="tab-content" id="servicios">
+      <h2>Servicios publicados</h2>
+      <ul class="servicios-list">
+        <li>
+          <h3>Reparación de electrodomésticos</h3>
+          <p>Publicado el 12/09/2025 · Rosario</p>
+          <a href="editar-servicio.html?id=1">Editar</a>
+        </li>
+        <li>
+          <h3>Instalación de aire acondicionado</h3>
+          <p>Publicado el 05/08/2025 · Santa Fe</p>
+          <a href="editar-servicio.html?id=2">Editar</a>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingeniería y Calidad de Software</p>
+    </div>
+  </footer>
+
+ 
+<script>
+  const tabButtons = document.querySelectorAll('.perfil-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none';
+      });
+
+      button.classList.add('active');
+      const activeTab = document.getElementById(button.dataset.tab);
+      activeTab.classList.add('active');
+      activeTab.style.display = 'block';
+    });
+  });
+</script>
+</body>
+</html>
