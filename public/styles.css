@@ -112,6 +112,11 @@ h1 {
   margin: 24px 0 8px;
 }
 
+h1.titulo-centrado {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
 h2 {
   font-size: 1.5rem;
   margin: 18px 0 12px;
@@ -122,6 +127,7 @@ h3 {
   font-size: 1.2rem;
   margin: 0 0 8px;
 }
+
 
 
 .search {
@@ -246,6 +252,20 @@ h3 {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+.centrado {
+  text-align: center;
+}
+
+.link-crear {
+  color: var(--primary, #007bff);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link-crear:hover {
+  text-decoration: underline;
+}
+
 
 .profile {
   display: grid;
@@ -308,6 +328,39 @@ h3 {
   border: 1px solid rgba(0,0,0,.06);
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
+
+.formChico {
+  max-width: 400px;
+  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+  background: var(--surface);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilo de los inputs igual que en .form */
+.formChico input[type="text"],
+.formChico input[type="password"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background-color: #fff;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.formChico input[type="text"]:focus,
+.formChico input[type="password"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
 
 .form label {
   display: flex;

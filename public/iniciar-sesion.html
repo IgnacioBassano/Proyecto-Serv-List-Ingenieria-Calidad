@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar Sesión · Serv-list</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">Serv-list</a>
+      <nav class="nav">
+        <a href="index.html">Buscar</a>
+        <a href="prestador.html?id=1">Prestador</a>
+        <a href="publicar-servicio.html" class="btn active">Publicar</a>
+        <a href="iniciar-sesion.html" >Iniciar Sesión</a>
+        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="titulo-centrado">Iniciar sesión</h1>
+
+    <form class="formChico" id="form-publicar">
+      <label>
+        <span>Usuario </span>
+        <input type="text" name="titulo" placeholder="usuario" required />
+      </label>
+
+      
+      <label>
+        <span>Contraseña</span>
+        <input type="text" name="titulo" placeholder="contraseña" required />
+      </label>
+      
+
+      <button class="btn" type="submit">Iniciar Sesión</button>
+    </form>
+
+    <p class="muted centrado">¿No tienes una cuenta? <a href="crear-cuenta.html" class="link-crear">Crear cuenta</a></p>
+
+
+     </main>
+   
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingenieria y Calidad de Software</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
