@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iniciar Sesión · Serv-list</title>
+  <title>Crear Cuenta · Serv-list</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <script src="scripts/nav.js"></script>
@@ -14,20 +14,50 @@
       <nav class="nav">
         <a href="index.html">Buscar</a>
         <a href="prestador.html?id=1">Prestador</a>
-        <a href="publicar-servicio.html" class="btn active">Publicar</a>
-        <a href="iniciar-sesion.html" >Iniciar Sesión</a>
+        <a href="publicar-servicio.html" class="btn">Publicar</a>
+        <a href="iniciar-sesion.html">Iniciar Sesión</a>
         <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
       </nav>
     </div>
   </header>
 
   <main class="container">
-    <h1 class="titulo-centrado">Iniciar sesión</h1>
+    <h1 class="titulo-centrado">Crear cuenta</h1>
 
-    <form class="formChico" id="loginForm">
+    <form class="formChico" id="registroForm">
+      <label>
+        <span>Nombre</span>
+        <input type="text" name="nombre" placeholder="Nombre" required />
+      </label>
+
+      <label>
+        <span>Apellido</span>
+        <input type="text" name="apellido" placeholder="Apellido" required />
+      </label>
+
       <label>
         <span>Correo electrónico</span>
         <input type="email" name="email" placeholder="usuario@example.com" required />
+      </label>
+
+      <label>
+        <span>Teléfono</span>
+        <input type="text" name="telefono" placeholder="3411234567" required />
+      </label>
+
+      <label>
+        <span>Calle</span>
+        <input type="text" name="calle" placeholder="San Martín" required />
+      </label>
+
+      <label>
+        <span>Número</span>
+        <input type="text" name="numero" placeholder="123" required />
+      </label>
+
+      <label>
+        <span>Localidad</span>
+        <input type="text" name="localidad" placeholder="Rosario" required />
       </label>
 
       <label>
@@ -35,12 +65,12 @@
         <input type="password" name="password" placeholder="Contraseña" required />
       </label>
 
-      <button class="btn" type="submit">Iniciar Sesión</button>
+      <button class="btn" type="submit">Registrarme</button>
     </form>
 
     <p class="muted centrado">
-      ¿No tienes una cuenta?
-      <a href="registro.html" class="link-crear">Crear cuenta</a>
+      ¿Ya tienes una cuenta?
+      <a href="iniciar-sesion.html" class="link-crear">Iniciar sesión</a>
     </p>
 
     <p id="msg" class="centrado"></p>
@@ -53,17 +83,17 @@
   </footer>
 
   <script>
-    const form = document.getElementById("loginForm");
+    const form = document.getElementById("registroForm");
     const msg = document.getElementById("msg");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(form));
-      msg.textContent = "Verificando...";
+      msg.textContent = "Enviando...";
       msg.style.color = "gray";
 
       try {
-        const res = await fetch("/api/usuarios/login", {
+        const res = await fetch("/api/usuarios/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
@@ -71,16 +101,16 @@
 
         const json = await res.json();
         if (res.ok) {
-          msg.textContent = "✅ Sesión iniciada correctamente.";
+          msg.textContent = "✅ Registro exitoso. Ahora puedes iniciar sesión.";
           msg.style.color = "green";
-          localStorage.setItem("token", json.token);
-          setTimeout(() => (window.location.href = "index.html"), 1000);
+          form.reset();
+          setTimeout(() => (window.location.href = "iniciar-sesion.html"), 1500);
         } else {
-          msg.textContent = "⚠️ " + (json.error || "Credenciales inválidas");
+          msg.textContent = "⚠️ " + (json.error || "Error en el registro");
           msg.style.color = "red";
         }
       } catch (err) {
-        msg.textContent = "❌ Error al conectar con el servidor.";
+        msg.textContent = "❌ Error al conectar con el servidor";
         msg.style.color = "red";
       }
     });

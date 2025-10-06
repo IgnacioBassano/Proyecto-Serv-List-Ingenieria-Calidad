@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,8 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Usuario {
+  id         Int       @id @default(autoincrement())
+  nombre     String
+  apellido   String
+  email      String    @unique
+  telefono   String
+  calle      String
+  numero     String
+  localidad  String
+  password   String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  servicios  Servicio[]
+}
+
 model Servicio {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   titulo      String
   categoria   String
   ubicacion   String
@@ -17,17 +32,17 @@ model Servicio {
   imagen      String
   email       String?
   descripcion String?
-  rating      Float?   @default(4.0)
+  rating      Float?    @default(4.0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  usuario     Usuario?  @relation(fields: [usuarioId], references: [id])
+  usuarioId   Int?
 
   items       ServicioItem[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
   @@index([categoria])
   @@index([ubicacion])
-  // opcional:
-  // @@index([categoria, ubicacion])
 }
 
 model ServicioItem {
@@ -38,12 +53,13 @@ model ServicioItem {
 }
 
 model Turno {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   servicioId Int?
   nombre     String
   email      String
   fecha      DateTime?
   detalle    String?
-
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 }
+
+

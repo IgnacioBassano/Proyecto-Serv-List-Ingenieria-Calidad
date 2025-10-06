@@ -10,40 +10,45 @@
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">Serv-list</a>
-      <nav class="nav">
-        <a href="index.html">Buscar</a>
-        <a href="perfil.html" class="active">Mi Perfil</a>
-        <a href="publicar-servicio.html" class="btn">Publicar</a>
-        <a href="iniciar-sesion.html">Cerrar Sesión</a>
-        
-        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
-      </nav>
+      <nav class="nav"></nav>
     </div>
   </header>
 
-  <main class="container perfil-container">
-    <h1>Mi Perfil</h1>
+  <main class="container">
+    <section class="perfil-header">
+      <img src="assets/avatar-placeholder.png" alt="Avatar del usuario">
+      <h2 id="nombre-usuario">Juan Pérez</h2>
+      <p id="email-usuario">juan@example.com</p>
+    </section>
 
     <div class="tabs">
-  <button class="perfil-tab active" data-tab="datos">Datos personales</button>
-  <button class="perfil-tab" data-tab="reseñas">Reseñas</button>
-  <button class="perfil-tab" data-tab="servicios">Servicios</button>
-</div>
+      <button class="perfil-tab active" data-tab="datos">Datos personales</button>
+      <button class="perfil-tab" data-tab="reseñas">Reseñas</button>
+      <button class="perfil-tab" data-tab="servicios">Servicios</button>
+    </div>
 
     <div class="tab-content active" id="datos">
-      <h2>Datos personales</h2>
-      <form class="perfil-form">
-        <label>Nombre completo:</label>
-        <input type="text" value="Juan Pérez" />
-        <label>Email:</label>
-        <input type="email" value="juan@example.com" />
-        <label>Teléfono:</label>
-        <input type="tel" value="+54 9 341 1234567" />
-        <button type="submit">Guardar cambios</button>
+      <form class="perfil-form" id="perfil-form">
+        <label>
+          <span>Nombre completo</span>
+          <input type="text" id="nombre" value="">
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input type="email" id="email" value="">
+        </label>
+
+        <label>
+          <span>Teléfono</span>
+          <input type="tel" id="telefono" value="">
+        </label>
+
+        <button type="submit" class="btn">Guardar cambios</button>
       </form>
     </div>
 
-    <div class="tab-content" id="reseñas">
+    <div class="tab-content" id="reseñas" style="display:none;">
       <h2>Reseñas recibidas</h2>
       <div class="review">
         <p><strong>María López:</strong> Excelente servicio, muy puntual y profesional.</p>
@@ -55,7 +60,7 @@
       </div>
     </div>
 
-    <div class="tab-content" id="servicios">
+    <div class="tab-content" id="servicios" style="display:none;">
       <h2>Servicios publicados</h2>
       <ul class="servicios-list">
         <li>
@@ -78,25 +83,90 @@
     </div>
   </footer>
 
- 
-<script>
-  const tabButtons = document.querySelectorAll('.perfil-tab');
-  const tabContents = document.querySelectorAll('.tab-content');
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const tabButtons = document.querySelectorAll('.perfil-tab');
+      const tabContents = document.querySelectorAll('.tab-content');
 
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      tabContents.forEach(content => {
-        content.classList.remove('active');
-        content.style.display = 'none';
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => {
+            content.classList.remove('active');
+            content.style.display = 'none';
+          });
+
+          button.classList.add('active');
+          const activeTab = document.getElementById(button.dataset.tab);
+          activeTab.classList.add('active');
+          activeTab.style.display = 'block';
+        });
       });
-
-      button.classList.add('active');
-      const activeTab = document.getElementById(button.dataset.tab);
-      activeTab.classList.add('active');
-      activeTab.style.display = 'block';
     });
-  });
-</script>
+  </script>
+
+  <script type="module">
+    import jwtDecode from 'https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.esm.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Tenés que iniciar sesión para acceder al perfil.");
+        window.location.href = "iniciar-sesion.html";
+        return;
+      }
+
+      let user;
+      try {
+        user = jwtDecode(token);
+        document.getElementById("nombre-usuario").textContent = user.nombre || "Usuario";
+        document.getElementById("email-usuario").textContent = user.email || "Sin correo disponible";
+        document.getElementById("nombre").value = user.nombre || "";
+        document.getElementById("email").value = user.email || "";
+      } catch (err) {
+        console.error("❌ Error al decodificar el token:", err);
+        localStorage.removeItem("token");
+        window.location.href = "iniciar-sesion.html";
+      }
+
+      const form = document.getElementById("perfil-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombre").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const telefono = document.getElementById("telefono").value.trim();
+
+        try {
+          const res = await fetch("/api/usuarios/update", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: user.id,
+              nombre,
+              email,
+              telefono,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            alert("✅ Datos actualizados correctamente.");
+            document.getElementById("nombre-usuario").textContent = nombre;
+            document.getElementById("email-usuario").textContent = email;
+          } else {
+            alert("⚠️ " + (data.error || "No se pudieron actualizar los datos."));
+          }
+        } catch (err) {
+          console.error("❌ Error en la solicitud:", err);
+          alert("Error al conectar con el servidor.");
+        }
+      });
+    });
+  </script>
+
+  <script src="scripts/nav.js"></script>
 </body>
 </html>

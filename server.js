@@ -8,8 +8,12 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const usuarioRoutes = require("./routes/usuario");
+
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/usuarios", usuarioRoutes);
 
 const imagenPorCategoria = {
   "Electricista": "/assets/marioelectricista.png",
