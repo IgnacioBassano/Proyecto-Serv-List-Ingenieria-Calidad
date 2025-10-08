@@ -4,6 +4,8 @@
   - You are about to drop the `Reseña` table. If the table is not empty, all the data it contains will be lost.
 
 */
+ALTER TABLE "Reseña" RENAME TO "Resena";
+
 -- DropTable
 PRAGMA foreign_keys=off;
 DROP TABLE "Reseña";

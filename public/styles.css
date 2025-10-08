@@ -1338,3 +1338,110 @@ html.dark .avatar-edit-btn {
   font-weight: bold;
   margin-top: 0.5rem;
 }
+/* ================================
+   ⭐ Reseñas - estilo visual igual a "Solicitar turno"
+   ================================ */
+.prestador-reseñas {
+  background: #fff8ee;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  margin-top: 35px;
+  padding: 35px;
+  animation: fadeIn 0.4s ease both;
+}
+
+/* Título */
+.prestador-reseñas h2 {
+  color: #d97706;
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f0c36d;
+  padding-bottom: 10px;
+}
+
+/* Formulario */
+.prestador-reseñas form {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.prestador-reseñas label {
+  font-weight: 600;
+  color: #6b4b17;
+}
+
+.prestador-reseñas input,
+.prestador-reseñas textarea,
+.prestador-reseñas select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prestador-reseñas input:focus,
+.prestador-reseñas textarea:focus,
+.prestador-reseñas select:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217,119,6,0.3);
+}
+
+.prestador-reseñas button {
+  background-color: #d97706;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.prestador-reseñas button:hover {
+  background-color: #b16103;
+  transform: translateY(-2px);
+}
+
+/* Reseñas ya publicadas */
+.reseñas-list {
+  list-style: none;
+  margin-top: 30px;
+  padding: 0;
+}
+
+.reseña-item {
+  background: #fff;
+  border-left: 4px solid #f0c36d;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.reseña-item strong {
+  color: #d97706;
+}
+
+.reseña-item p {
+  margin: 4px 0;
+  color: #444;
+  line-height: 1.5;
+}
+
+/* 🌙 Modo oscuro */
+html.dark .prestador-reseñas {
+  background: #2b2b2b;
+}
+
+html.dark .reseña-item {
+  background: #2e2e2e;
+  border-color: #f59e0b;
+  color: #f5f5f5;
+}

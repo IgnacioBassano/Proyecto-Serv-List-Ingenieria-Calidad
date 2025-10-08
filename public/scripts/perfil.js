@@ -55,6 +55,106 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarPerfil();
 
   // ===============================
+  // 📝 Edición de datos personales
+  // ===============================
+  const editButtons = document.querySelectorAll(".edit-btn");
+  const guardarBtn = document.querySelector(".guardar-btn");
+
+  if (editButtons && guardarBtn && form) {
+    editButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const fieldGroup = e.target.closest(".field-group");
+        const input = fieldGroup.querySelector("input");
+        input.removeAttribute("readonly");
+        input.focus();
+        btn.style.display = "none";
+        guardarBtn.style.display = "block";
+      });
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        nombre: document.getElementById("nombre").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        telefono: document.getElementById("telefono").value.trim(),
+        localidad: document.getElementById("localidad").value.trim(),
+      };
+
+      try {
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+const res = await fetch("/api/usuarios/update", {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({ id: usuario.id, ...data }),
+});
+
+
+        const result = await res.json();
+
+        if (res.ok) {
+          alert("✅ Perfil actualizado correctamente.");
+          await cargarPerfil();
+          guardarBtn.style.display = "none";
+          editButtons.forEach((b) => (b.style.display = "inline-block"));
+        } else {
+          alert("⚠️ " + (result.error || "No se pudo actualizar el perfil."));
+        }
+      } catch (err) {
+        console.error("❌ Error al guardar perfil:", err);
+        alert("⚠️ No se pudo guardar el perfil.");
+      }
+    });
+  }
+
+  // 🖼️ Actualización de foto/avatar
+if (avatarInput) {
+  avatarInput.addEventListener("change", async () => {
+    const file = avatarInput.files[0];
+    if (!file) return;
+
+    // Convertir a Base64 (más simple que usar upload multipart)
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Image = reader.result;
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+      try {
+        const res = await fetch("/api/usuarios/update", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: usuario.id,
+            imagen: base64Image,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          avatarImg.src = data.usuario.imagen;
+          localStorage.setItem("avatar", data.usuario.imagen);
+          alert("✅ Imagen de perfil actualizada.");
+        } else {
+          alert("⚠️ " + (data.error || "No se pudo actualizar la imagen."));
+        }
+      } catch (err) {
+        console.error("❌ Error al subir avatar:", err);
+      }
+    };
+
+    reader.readAsDataURL(file); // Lee la imagen y la convierte a Base64
+  });
+}
+
+
+  // ===============================
   // 📦 Mostrar servicios del usuario
   // ===============================
   async function cargarServicios() {
@@ -211,10 +311,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <li class="reseña-item card-servicio">
           <div class="servicio-info">
             <p><strong>${r.nombre}</strong> (${r.email})</p>
-            <p>Servicio: <em>${r.servicio}</em> (${r.categoria || "—"})</p>
+            <p>Servicio: <em>${r.servicio}</em></p>
             <p>⭐ ${r.puntaje}/5</p>
             <p>${r.comentario}</p>
-            <p class="muted">${new Date(r.fecha).toLocaleDateString()}</p>
+            <p class="muted">${new Date(r.createdAt).toLocaleDateString()}</p>
           </div>
         </li>`
         )
@@ -241,7 +341,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Guardar cambios de servicio
   formEditar.addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("edit-id").value;
@@ -313,7 +412,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.classList.add("active");
       document.getElementById(btn.dataset.tab).style.display = "block";
 
-      // Si abrís la pestaña de reseñas, cargamos las reseñas recibidas
       if (btn.dataset.tab === "reseñas") {
         cargarResenasRecibidas();
       }
