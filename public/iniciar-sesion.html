@@ -3,21 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iniciar Sesión · Serv-list</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#d97706" />
+  <title>Serv-list · Iniciar sesión</title>
+
+  <!-- 🧩 FIX: aplicar modo oscuro antes del CSS -->
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<script src="scripts/nav.js"></script>
+
 <body>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">Serv-list</a>
-      <nav class="nav">
-        <a href="index.html">Buscar</a>
-        <a href="prestador.html?id=1">Prestador</a>
-        <a href="publicar-servicio.html" class="btn active">Publicar</a>
-        <a href="iniciar-sesion.html" >Iniciar Sesión</a>
-        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
-      </nav>
+      <nav class="nav"><!-- generado dinámicamente por nav.js --></nav>
     </div>
   </header>
 
@@ -52,6 +64,9 @@
     </div>
   </footer>
 
+  <!-- =========================
+       📜 Script de inicio de sesión
+  ========================== -->
   <script>
     const form = document.getElementById("loginForm");
     const msg = document.getElementById("msg");
@@ -70,20 +85,46 @@
         });
 
         const json = await res.json();
-        if (res.ok) {
+        console.log("🔍 Respuesta del servidor:", json);
+
+        if (res.ok && json.token) {
+          // 🧹 Limpiar sesión previa completamente
+          localStorage.clear();
+
+          // 🔐 Guardar token y datos del usuario actual
+          localStorage.setItem("token", json.token);
+
+          if (json.usuario) {
+            localStorage.setItem("usuario", JSON.stringify(json.usuario)); // ✅ guarda todo el objeto con id, email y rol
+            localStorage.setItem("rol", json.usuario.rol || "CLIENTE");    // ✅ guarda el rol (clave para mostrar el botón)
+          }
+
           msg.textContent = "✅ Sesión iniciada correctamente.";
           msg.style.color = "green";
-          localStorage.setItem("token", json.token);
-          setTimeout(() => (window.location.href = "index.html"), 1000);
+
+          // 🚀 Redirigir según el rol real
+          setTimeout(() => {
+            const rol = json.usuario?.rol || "CLIENTE";
+            if (rol === "PRESTADOR") {
+              window.location.href = "publicar-servicio.html";
+            } else {
+              window.location.href = "perfil.html";
+            }
+          }, 1000);
         } else {
           msg.textContent = "⚠️ " + (json.error || "Credenciales inválidas");
           msg.style.color = "red";
         }
       } catch (err) {
+        console.error("Error en conexión:", err);
         msg.textContent = "❌ Error al conectar con el servidor.";
         msg.style.color = "red";
       }
     });
   </script>
+
+  <!-- ✅ Scripts globales -->
+  <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
 </body>
 </html>

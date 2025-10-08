@@ -3,9 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mi Perfil · Serv-list</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#d97706" />
+  <title>Serv-list · Mi perfil</title>
+
+  <script>
+    (function() {
+      const theme = localStorage.getItem("theme");
+      if (theme === "dark") document.documentElement.classList.add("dark");
+    })();
+  </script>
+
   <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <header class="site-header">
     <div class="container header-inner">
@@ -14,67 +27,130 @@
     </div>
   </header>
 
-  <main class="container">
-    <section class="perfil-header">
-      <img src="assets/avatar-placeholder.png" alt="Avatar del usuario">
-      <h2 id="nombre-usuario">Juan Pérez</h2>
-      <p id="email-usuario">juan@example.com</p>
+  <main class="container perfil-dashboard">
+    <!-- PANEL LATERAL -->
+    <aside class="perfil-sidebar">
+      <div class="perfil-avatar-wrapper">
+        <img id="avatar-img" src="assets/avatar-placeholder.png" alt="Avatar">
+        <label for="avatar-input" class="avatar-edit-btn">📷</label>
+        <input type="file" id="avatar-input" accept="image/*" hidden>
+      </div>
+
+      <h2 id="nombre-usuario">Usuario</h2>
+      <p id="email-usuario" class="muted"></p>
+      <p id="rol-usuario" class="rol-tag">Rol: —</p>
+
+      <div class="perfil-resumen">
+        <p><strong>📍 Localidad:</strong> <span id="localidad-resumen">—</span></p>
+        <p><strong>📞 Teléfono:</strong> <span id="telefono-resumen">—</span></p>
+        <p><strong>🛠️ Servicios publicados:</strong> <span id="servicios-count">0</span></p>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <section class="perfil-main">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="perfil-tab active" data-tab="datos">Datos personales</button>
+        <button class="perfil-tab" data-tab="servicios">Servicios</button>
+        <button class="perfil-tab" data-tab="seguridad">Seguridad</button>
+        <button class="perfil-tab" data-tab="turnos">Turnos</button>
+        <button class="perfil-tab" data-tab="reseñas">Reseñas</button>
+      </div>
+
+      <!-- DATOS PERSONALES -->
+      <div id="datos" class="tab-content" style="display:block;">
+        <form id="perfil-form" class="perfil-form">
+          <div class="editable-field">
+            <label>Nombre completo</label>
+            <div class="field-group">
+              <input type="text" id="nombre" readonly />
+              <button type="button" class="edit-btn">✏️</button>
+            </div>
+          </div>
+
+          <div class="editable-field">
+            <label>Email</label>
+            <div class="field-group">
+              <input type="email" id="email" readonly />
+              <button type="button" class="edit-btn">✏️</button>
+            </div>
+          </div>
+
+          <div class="editable-field">
+            <label>Teléfono</label>
+            <div class="field-group">
+              <input type="tel" id="telefono" readonly />
+              <button type="button" class="edit-btn">✏️</button>
+            </div>
+          </div>
+
+          <div class="editable-field">
+            <label>Localidad</label>
+            <div class="field-group">
+              <input type="text" id="localidad" readonly />
+              <button type="button" class="edit-btn">✏️</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn guardar-btn" style="display:none;">💾 Guardar cambios</button>
+        </form>
+      </div>
+
+      <!-- SERVICIOS -->
+      <div id="servicios" class="tab-content" style="display:none;">
+        <h2>Mis servicios</h2>
+        <ul class="servicios-list"></ul>
+      </div>
+
+      <!-- SEGURIDAD -->
+      <div id="seguridad" class="tab-content" style="display:none;">
+        <h2>Cambiar contraseña</h2>
+
+        <form id="password-form" class="perfil-form">
+          <label>Contraseña actual</label>
+          <input type="password" id="current-pass" placeholder="Tu contraseña actual" required>
+
+          <label>Nueva contraseña</label>
+          <input type="password" id="new-pass" placeholder="Debe tener mayúscula, minúscula y número" required>
+
+          <label>Confirmar nueva contraseña</label>
+          <input type="password" id="confirm-pass" placeholder="Repetí la nueva contraseña" required>
+
+          <!-- Barra visual de fortaleza -->
+          <div id="password-strength">
+            <div id="strength-bar"></div>
+          </div>
+          <span id="strength-text"></span>
+
+          <!-- Requisitos -->
+          <ul id="password-requisitos">
+            <li id="req-length" class="invalid">Mínimo 6 caracteres</li>
+            <li id="req-upper" class="invalid">Al menos una mayúscula (A–Z)</li>
+            <li id="req-lower" class="invalid">Al menos una minúscula (a–z)</li>
+            <li id="req-number" class="invalid">Al menos un número (0–9)</li>
+            <li id="req-match" class="invalid">Las contraseñas coinciden</li>
+          </ul>
+
+          <button type="submit" id="btn-password" class="btn" style="margin-top:18px;" disabled>
+            Actualizar contraseña
+          </button>
+        </form>
+      </div>
+
+      <!-- TURNOS -->
+      <div id="turnos" class="tab-content" style="display:none;">
+        <h2>Mis turnos</h2>
+        <ul id="lista-turnos" class="servicios-list"></ul>
+      </div>
+
+      <!-- RESEÑAS -->
+<div id="reseñas" class="tab-content" style="display:none;">
+  <h2>Reseñas recibidas</h2>
+  <ul id="lista-resenas" class="servicios-list"></ul>
+</div>
+
     </section>
-
-    <div class="tabs">
-      <button class="perfil-tab active" data-tab="datos">Datos personales</button>
-      <button class="perfil-tab" data-tab="reseñas">Reseñas</button>
-      <button class="perfil-tab" data-tab="servicios">Servicios</button>
-    </div>
-
-    <div class="tab-content active" id="datos">
-      <form class="perfil-form" id="perfil-form">
-        <label>
-          <span>Nombre completo</span>
-          <input type="text" id="nombre" value="">
-        </label>
-
-        <label>
-          <span>Email</span>
-          <input type="email" id="email" value="">
-        </label>
-
-        <label>
-          <span>Teléfono</span>
-          <input type="tel" id="telefono" value="">
-        </label>
-
-        <button type="submit" class="btn">Guardar cambios</button>
-      </form>
-    </div>
-
-    <div class="tab-content" id="reseñas" style="display:none;">
-      <h2>Reseñas recibidas</h2>
-      <div class="review">
-        <p><strong>María López:</strong> Excelente servicio, muy puntual y profesional.</p>
-        <p>⭐⭐⭐⭐⭐</p>
-      </div>
-      <div class="review">
-        <p><strong>Carlos Gómez:</strong> Buen trabajo, aunque tardó un poco más de lo esperado.</p>
-        <p>⭐⭐⭐⭐</p>
-      </div>
-    </div>
-
-    <div class="tab-content" id="servicios" style="display:none;">
-      <h2>Servicios publicados</h2>
-      <ul class="servicios-list">
-        <li>
-          <h3>Reparación de electrodomésticos</h3>
-          <p>Publicado el 12/09/2025 · Rosario</p>
-          <a href="editar-servicio.html?id=1">Editar</a>
-        </li>
-        <li>
-          <h3>Instalación de aire acondicionado</h3>
-          <p>Publicado el 05/08/2025 · Santa Fe</p>
-          <a href="editar-servicio.html?id=2">Editar</a>
-        </li>
-      </ul>
-    </div>
   </main>
 
   <footer class="site-footer">
@@ -83,90 +159,35 @@
     </div>
   </footer>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const tabButtons = document.querySelectorAll('.perfil-tab');
-      const tabContents = document.querySelectorAll('.tab-content');
+  <!-- ✏️ Modal de edición de servicio -->
+  <div id="editar-modal" class="modal">
+    <div class="modal-content">
+      <h2>Editar servicio</h2>
+      <form id="editar-form">
+        <input type="hidden" id="edit-id">
 
-      tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          tabButtons.forEach(btn => btn.classList.remove('active'));
-          tabContents.forEach(content => {
-            content.classList.remove('active');
-            content.style.display = 'none';
-          });
+        <label for="edit-titulo">Título</label>
+        <input type="text" id="edit-titulo" required>
 
-          button.classList.add('active');
-          const activeTab = document.getElementById(button.dataset.tab);
-          activeTab.classList.add('active');
-          activeTab.style.display = 'block';
-        });
-      });
-    });
-  </script>
+        <label for="edit-categoria">Categoría</label>
+        <input type="text" id="edit-categoria" required>
 
-  <script type="module">
-    import jwtDecode from 'https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.esm.js';
+        <label for="edit-ubicacion">Ubicación</label>
+        <input type="text" id="edit-ubicacion" required>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const token = localStorage.getItem("token");
+        <label for="edit-comentario">Comentario</label>
+        <textarea id="edit-comentario" required></textarea>
 
-      if (!token) {
-        alert("Tenés que iniciar sesión para acceder al perfil.");
-        window.location.href = "iniciar-sesion.html";
-        return;
-      }
-
-      let user;
-      try {
-        user = jwtDecode(token);
-        document.getElementById("nombre-usuario").textContent = user.nombre || "Usuario";
-        document.getElementById("email-usuario").textContent = user.email || "Sin correo disponible";
-        document.getElementById("nombre").value = user.nombre || "";
-        document.getElementById("email").value = user.email || "";
-      } catch (err) {
-        console.error("❌ Error al decodificar el token:", err);
-        localStorage.removeItem("token");
-        window.location.href = "iniciar-sesion.html";
-      }
-
-      const form = document.getElementById("perfil-form");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const nombre = document.getElementById("nombre").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const telefono = document.getElementById("telefono").value.trim();
-
-        try {
-          const res = await fetch("/api/usuarios/update", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: user.id,
-              nombre,
-              email,
-              telefono,
-            }),
-          });
-
-          const data = await res.json();
-
-          if (res.ok) {
-            alert("✅ Datos actualizados correctamente.");
-            document.getElementById("nombre-usuario").textContent = nombre;
-            document.getElementById("email-usuario").textContent = email;
-          } else {
-            alert("⚠️ " + (data.error || "No se pudieron actualizar los datos."));
-          }
-        } catch (err) {
-          console.error("❌ Error en la solicitud:", err);
-          alert("Error al conectar con el servidor.");
-        }
-      });
-    });
-  </script>
+        <div class="modal-buttons">
+          <button type="submit" class="btn-guardar">💾 Guardar cambios</button>
+          <button type="button" id="cerrar-modal" class="btn-cerrar">❌ Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
+  <script src="scripts/perfil.js"></script>
 </body>
 </html>

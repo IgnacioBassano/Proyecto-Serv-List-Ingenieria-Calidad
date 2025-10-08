@@ -6,32 +6,26 @@
   <title>Perfil del Prestador · Serv-list</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<script src="scripts/nav.js"></script>
 <body>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">Serv-list</a>
-      <nav class="nav">
-        <a href="index.html">Buscar</a>
-        <a href="prestador.html" class="active">Prestador</a>
-        <a href="publicar-servicio.html" class="btn">Publicar</a>
-        <a href="iniciar-sesion.html" >Iniciar Sesión</a>
-         <a href="perfil.html" >Perfil</a>
-        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
-      </nav>
+      <nav class="nav"></nav>
     </div>
   </header>
 
   <main class="container" id="prestador-view">
-
+    <!-- Aquí se cargará dinámicamente el perfil -->
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p class="muted">© 2025 Serv-list · Proyecto de Ingenieria y Calidad de Software</p>
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingeniería y Calidad de Software</p>
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
+  <script src="scripts/prestador.js"></script>
 </body>
 </html>

@@ -7,24 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Rol {
+  CLIENTE
+  PRESTADOR
+}
+
 model Usuario {
-  id         Int       @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   nombre     String
   apellido   String
-  email      String    @unique
-  telefono   String
-  calle      String
-  numero     String
-  localidad  String
+  email      String     @unique
+  telefono   String?    // 🟢 Ahora opcional
+  calle      String?    // 🟢 Ahora opcional
+  numero     String?    // 🟢 Ahora opcional
+  localidad  String?    // 🟢 Ahora opcional
+  imagen     String?    // 🆕 Nuevo campo para guardar avatar (URL o base64)
   password   String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  rol        Rol
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   servicios  Servicio[]
 }
 
+
 model Servicio {
-  id          Int       @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   titulo      String
   categoria   String
   ubicacion   String
@@ -32,18 +40,21 @@ model Servicio {
   imagen      String
   email       String?
   descripcion String?
-  rating      Float?    @default(4.0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  rating      Float?          @default(4.0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
-  usuario     Usuario?  @relation(fields: [usuarioId], references: [id])
-  usuarioId   Int?
+  usuarioId   Int
+  usuario     Usuario         @relation(fields: [usuarioId], references: [id])
 
   items       ServicioItem[]
+  turnos      Turno[]
+  resenas     Resena[]
 
   @@index([categoria])
   @@index([ubicacion])
 }
+
 
 model ServicioItem {
   id         Int       @id @default(autoincrement())
@@ -55,11 +66,22 @@ model ServicioItem {
 model Turno {
   id         Int       @id @default(autoincrement())
   servicioId Int?
+  servicio   Servicio? @relation(fields: [servicioId], references: [id])
   nombre     String
   email      String
   fecha      DateTime?
   detalle    String?
+  estado     String    @default("pendiente")
   createdAt  DateTime  @default(now())
 }
 
-
+model Resena {
+  id         Int       @id @default(autoincrement())
+  servicioId Int
+  servicio   Servicio  @relation(fields: [servicioId], references: [id])
+  nombre     String
+  email      String
+  comentario String
+  puntaje    Int       // de 1 a 5
+  createdAt  DateTime  @default(now())
+}

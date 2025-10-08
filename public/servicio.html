@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Detalle del servicio · Serv-list</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">Serv-list</a>
+      <nav class="nav"></nav>
+    </div>
+  </header>
+
+  <main class="container" id="servicio-container">
+    <section id="servicio-detalle" class="card-servicio">
+      <p class="muted">Cargando servicio...</p>
+    </section>
+
+    <section id="solicitud-turno" class="prestador-turno" style="display:none;">
+      <h2>Solicitar turno</h2>
+      <form id="form-turno" class="perfil-form">
+        <label>Nombre</label>
+        <input type="text" id="turno-nombre" required>
+
+        <label>Email</label>
+        <input type="email" id="turno-email" required>
+
+        <label>Fecha (opcional)</label>
+        <input type="date" id="turno-fecha">
+
+        <label>Comentario (opcional)</label>
+        <textarea id="turno-detalle" placeholder="Especificá horario o detalle adicional"></textarea>
+
+        <button type="submit" class="btn">Reservar turno</button>
+        <p id="turno-ok" style="display:none; color:green;">✅ Turno reservado correctamente.</p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingeniería y Calidad de Software</p>
+    </div>
+  </footer>
+
+  <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
+  <script src="scripts/servicio.js"></script>
+</body>
+</html>

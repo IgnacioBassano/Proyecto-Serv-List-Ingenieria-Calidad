@@ -3,21 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Serv-list · Servicios</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#d97706" />
+  <title>Serv-list · Buscar servicios</title>
+
+  <!-- 🧩 FIX: aplicar modo oscuro antes del CSS -->
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") {
+          // Aplica el modo oscuro ANTES de que cargue el CSS
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- 🧾 Estilos principales -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- 🧠 Fuente base (Montserrat) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<script src="scripts/nav.js"></script>
+
+
 <body>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">Serv-list</a>
       <nav class="nav">
-        <a href="index.html" class="active">Buscar</a>
-        <a href="prestador.html">Prestador</a>
-        <a href="publicar-servicio.html" class="btn">Publicar</a>
-        <a href="iniciar-sesion.html" >Iniciar Sesión</a>
-        <a href="/registro.html">Registrarme</a>
-        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
+        <!-- El contenido se genera dinámicamente por nav.js -->
       </nav>
     </div>
   </header>
@@ -63,10 +81,13 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p class="muted">© 2025 Serv-list · Proyecto de Ingenieria y Calidad de Software</p>
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingeniería y Calidad de Software</p>
     </div>
   </footer>
 
+  <!-- Scripts -->
+  <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

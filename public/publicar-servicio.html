@@ -3,27 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Publicar servicio · Serv-list</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#d97706" />
+  <title>Serv-list · Publicar servicio</title>
+
+  <!-- 🧩 FIX: aplicar modo oscuro antes del CSS -->
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") {
+          // Aplica el modo oscuro ANTES de que cargue el CSS
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- 🧾 Estilos principales -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- 🧠 Fuente base (Montserrat) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<script src="scripts/nav.js"></script>
+
+
 <body>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">Serv-list</a>
-      <nav class="nav">
-        <a href="index.html">Buscar</a>
-        <a href="prestador.html?id=1">Prestador</a>
-        <a href="publicar-servicio.html" class="btn active">Publicar</a>
-        <a href="iniciar-sesion.html" >Iniciar Sesión</a>
-         <a href="perfil.html" >Perfil</a>
-        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
-      </nav>
+      <nav class="nav"><!-- generado dinámicamente por nav.js --></nav>
     </div>
   </header>
 
   <main class="container">
-    <h1>Publicar un nuevo servicio</h1>
+    <h1 class="titulo-centrado">Publicar un nuevo servicio</h1>
+    <p class="muted centrado">Completá los datos para ofrecer tu servicio en Serv-list.</p>
+
     <form class="form" id="form-publicar">
       <label>
         <span>Nombre completo</span>
@@ -80,15 +98,52 @@
       <button class="btn" type="submit">Publicar</button>
     </form>
 
-    <p id="publicado-ok" class="muted" style="display:none;">¡Servicio publicado!</p>
+    <p id="publicado-ok" class="muted centrado" style="display:none;">✅ ¡Servicio publicado correctamente!</p>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p class="muted">© 2025 Serv-list · Proyecto de Ingenieria y Calidad de Software</p>
+      <p class="muted">© 2025 Serv-list · Proyecto de Ingeniería y Calidad de Software</p>
     </div>
   </footer>
 
+  <!-- =========================
+       📜 Scripts globales
+  ========================== -->
+  <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
   <script src="app.js"></script>
+
+  <!-- =========================
+       🔒 Validación de sesión
+  ========================== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Tenés que iniciar sesión para publicar un servicio.");
+        window.location.href = "iniciar-sesion.html";
+      }
+    });
+  </script>
+  <!-- 🔒 Protección según rol -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("token");
+    const rol = localStorage.getItem("rol");
+
+    if (!token) {
+      alert("Tenés que iniciar sesión para publicar un servicio.");
+      window.location.href = "iniciar-sesion.html";
+      return;
+    }
+
+    if (rol !== "PRESTADOR") {
+      alert("Solo los prestadores pueden publicar servicios.");
+      window.location.href = "perfil.html";
+      return;
+    }
+  });
+</script>
 </body>
 </html>

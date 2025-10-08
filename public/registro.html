@@ -3,21 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crear Cuenta · Serv-list</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#d97706" />
+  <title>Serv-list · Crear cuenta</title>
+
+  <!-- 🧩 Aplicar modo oscuro antes del CSS -->
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") document.documentElement.classList.add("dark");
+      } catch (e) {}
+    })();
+  </script>
+
   <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<script src="scripts/nav.js"></script>
+
 <body>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">Serv-list</a>
-      <nav class="nav">
-        <a href="index.html">Buscar</a>
-        <a href="prestador.html?id=1">Prestador</a>
-        <a href="publicar-servicio.html" class="btn">Publicar</a>
-        <a href="iniciar-sesion.html">Iniciar Sesión</a>
-        <button id="toggle-theme" class="theme-toggle">🌙 Oscuro</button>
-      </nav>
+      <nav class="nav"><!-- generado dinámicamente por nav.js --></nav>
     </div>
   </header>
 
@@ -41,29 +51,13 @@
       </label>
 
       <label>
-        <span>Teléfono</span>
-        <input type="text" name="telefono" placeholder="3411234567" required />
-      </label>
-
-      <label>
-        <span>Calle</span>
-        <input type="text" name="calle" placeholder="San Martín" required />
-      </label>
-
-      <label>
-        <span>Número</span>
-        <input type="text" name="numero" placeholder="123" required />
-      </label>
-
-      <label>
-        <span>Localidad</span>
-        <input type="text" name="localidad" placeholder="Rosario" required />
-      </label>
-
-      <label>
-        <span>Contraseña</span>
-        <input type="password" name="password" placeholder="Contraseña" required />
-      </label>
+       <span>Contraseña</span>
+       <input type="password" name="password" id="password" placeholder="Contraseña" required />
+       <div id="password-strength">
+         <div id="strength-bar"></div>
+         <small id="strength-text">Ingresa una contraseña</small>
+       </div>
+     </label>
 
       <button class="btn" type="submit">Registrarme</button>
     </form>
@@ -82,38 +76,153 @@
     </div>
   </footer>
 
+  <script src="scripts/nav.js"></script>
+  <script src="scripts/theme.js"></script>
+
+  <!-- 🧠 Registro con validación visual -->
   <script>
-    const form = document.getElementById("registroForm");
-    const msg = document.getElementById("msg");
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("registroForm");
+      const msg = document.getElementById("msg");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form));
-      msg.textContent = "Enviando...";
-      msg.style.color = "gray";
+      // Crear lista de requisitos
+      const passwordInput = form.querySelector('input[name="password"]');
+      const container = passwordInput.parentElement;
+      const requisitos = document.createElement("ul");
+      requisitos.id = "password-requisitos";
+      requisitos.innerHTML = `
+        <li id="req-length" class="invalid">Mínimo 6 caracteres</li>
+        <li id="req-mayus" class="invalid">Al menos una mayúscula</li>
+        <li id="req-minus" class="invalid">Al menos una minúscula</li>
+        <li id="req-num" class="invalid">Al menos un número</li>
+      `;
+      container.appendChild(requisitos);
 
-      try {
-        const res = await fetch("/api/usuarios/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+      // Campo de confirmación
+      const confirmLabel = document.createElement("label");
+      confirmLabel.innerHTML = `
+        <span>Confirmar contraseña</span>
+        <input type="password" name="confirmPassword" placeholder="Repite la contraseña" required />
+      `;
+      form.insertBefore(confirmLabel, form.querySelector("button.btn"));
 
-        const json = await res.json();
-        if (res.ok) {
-          msg.textContent = "✅ Registro exitoso. Ahora puedes iniciar sesión.";
-          msg.style.color = "green";
-          form.reset();
-          setTimeout(() => (window.location.href = "iniciar-sesion.html"), 1500);
-        } else {
-          msg.textContent = "⚠️ " + (json.error || "Error en el registro");
+      const confirmInput = confirmLabel.querySelector("input");
+      const reqs = {
+        length: document.getElementById("req-length"),
+        mayus: document.getElementById("req-mayus"),
+        minus: document.getElementById("req-minus"),
+        num: document.getElementById("req-num"),
+      };
+
+      passwordInput.addEventListener("input", () => {
+        const val = passwordInput.value;
+        reqs.length.className = val.length >= 6 ? "valid" : "invalid";
+        reqs.mayus.className = /[A-Z]/.test(val) ? "valid" : "invalid";
+        reqs.minus.className = /[a-z]/.test(val) ? "valid" : "invalid";
+        reqs.num.className = /\d/.test(val) ? "valid" : "invalid";
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.textContent = "";
+        msg.style.color = "";
+
+        const data = Object.fromEntries(new FormData(form));
+        const { password, confirmPassword } = data;
+
+        // Validación básica antes de enviar
+        if (password.length < 6 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
+          msg.textContent = "⚠️ La contraseña no cumple los requisitos.";
+          msg.style.color = "red";
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          msg.textContent = "⚠️ Las contraseñas no coinciden.";
+          msg.style.color = "red";
+          return;
+        }
+
+        msg.textContent = "Enviando...";
+        msg.style.color = "gray";
+
+        try {
+          const res = await fetch("/api/usuarios/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          const json = await res.json();
+          if (res.ok) {
+            msg.textContent = "✅ Registro exitoso. Ahora puedes iniciar sesión.";
+            msg.style.color = "green";
+            form.reset();
+            setTimeout(() => (window.location.href = "iniciar-sesion.html"), 1500);
+          } else {
+            msg.textContent = "⚠️ " + (json.error || "Error en el registro");
+            msg.style.color = "red";
+          }
+        } catch {
+          msg.textContent = "❌ Error al conectar con el servidor.";
           msg.style.color = "red";
         }
-      } catch (err) {
-        msg.textContent = "❌ Error al conectar con el servidor";
-        msg.style.color = "red";
-      }
+      });
     });
   </script>
+
+  <script>
+  // ============================
+  // 🔒 Medidor de fortaleza de contraseña
+  // ============================
+  const passwordInput = document.getElementById("password");
+  const strengthBar = document.getElementById("strength-bar");
+  const strengthText = document.getElementById("strength-text");
+
+  passwordInput.addEventListener("input", () => {
+    const value = passwordInput.value;
+    let strength = 0;
+
+    // Criterios básicos
+    if (value.length >= 6) strength++;
+    if (/[A-Z]/.test(value)) strength++;
+    if (/[a-z]/.test(value)) strength++;
+    if (/\d/.test(value)) strength++;
+    if (/[^A-Za-z0-9]/.test(value)) strength++;
+
+    // Evaluar fuerza
+    let color = "#d1d5db"; // gris neutro
+    let text = "Ingresa una contraseña";
+
+    switch (strength) {
+      case 0:
+      case 1:
+        color = "#dc2626"; // rojo
+        text = "Muy débil";
+        break;
+      case 2:
+        color = "#f97316"; // naranja
+        text = "Débil";
+        break;
+      case 3:
+        color = "#eab308"; // amarillo
+        text = "Regular";
+        break;
+      case 4:
+        color = "#22c55e"; // verde medio
+        text = "Fuerte";
+        break;
+      case 5:
+        color = "#16a34a"; // verde oscuro
+        text = "Muy fuerte";
+        break;
+    }
+
+    strengthBar.style.width = (strength * 20) + "%";
+    strengthBar.style.backgroundColor = color;
+    strengthText.textContent = text;
+  });
+</script>
+
 </body>
 </html>
