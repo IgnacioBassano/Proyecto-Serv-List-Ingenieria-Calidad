@@ -169,6 +169,63 @@ app.post("/api/servicios", verificarToken, async (req, res) => {
 });
 
 // =============================
+// ✏️ Editar servicio por ID
+// =============================
+app.put("/api/servicios/:id", verificarToken, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { titulo, categoria, ubicacion, comentario } = req.body;
+
+    if (!titulo || !categoria || !ubicacion || !comentario) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+    }
+
+    const servicio = await prisma.servicio.findUnique({ where: { id } });
+    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+
+    // ✅ Validar que el servicio pertenece al usuario
+    if (servicio.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
+      return res.status(403).json({ error: "No tienes permiso para editar este servicio" });
+    }
+
+    const actualizado = await prisma.servicio.update({
+      where: { id },
+      data: { titulo, categoria, ubicacion, comentario },
+    });
+
+    res.json({ message: "✅ Servicio actualizado correctamente", servicio: actualizado });
+  } catch (error) {
+    console.error("❌ Error al editar servicio:", error);
+    res.status(500).json({ error: "Error al editar el servicio" });
+  }
+});
+
+// =============================
+// 🗑️ Eliminar servicio por ID
+// =============================
+app.delete("/api/servicios/:id", verificarToken, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const servicio = await prisma.servicio.findUnique({ where: { id } });
+    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+
+    // ✅ Validar que el servicio pertenece al usuario autenticado
+    if (servicio.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
+      return res.status(403).json({ error: "No tienes permiso para eliminar este servicio" });
+    }
+
+    await prisma.servicio.delete({ where: { id } });
+
+    res.json({ message: "🗑️ Servicio eliminado correctamente" });
+  } catch (error) {
+    console.error("❌ Error al eliminar servicio:", error);
+    res.status(500).json({ error: "Error al eliminar el servicio" });
+  }
+});
+
+
+// =============================
 // 🗓️ TURNOS
 // =============================
 app.post("/api/turnos", async (req, res) => {

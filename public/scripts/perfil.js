@@ -432,5 +432,92 @@ if (avatarInput) {
       setTimeout(() => (modal.style.display = "none"), 200);
     }
   });
+
+    // ===============================
+  // 🔒 Cambiar contraseña del usuario
+  // ===============================
+  const passwordForm = document.getElementById("password-form");
+  if (passwordForm) {
+    passwordForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const token = localStorage.getItem("token");
+
+      const passwordActual = document.getElementById("current-pass").value.trim();
+      const nuevaPassword = document.getElementById("new-pass").value.trim();
+      const confirmarPassword = document.getElementById("confirm-pass").value.trim();
+
+      if (!passwordActual || !nuevaPassword || !confirmarPassword) {
+        alert("⚠️ Todos los campos son obligatorios.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/usuarios/cambiar-password", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            id: usuario.id,
+            passwordActual,
+            nuevaPassword,
+            confirmarPassword,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert("✅ Contraseña actualizada correctamente.");
+          passwordForm.reset();
+        } else {
+          alert("⚠️ " + (data.error || "No se pudo cambiar la contraseña."));
+        }
+      } catch (error) {
+        console.error("❌ Error al cambiar contraseña:", error);
+        alert("❌ Error al conectar con el servidor.");
+      }
+    });
+
+    // ===============================
+// 🔍 Indicador de fortaleza de contraseña
+// ===============================
+const newPass = document.getElementById("new-pass");
+const confirmPass = document.getElementById("confirm-pass");
+
+if (newPass && confirmPass) {
+  const reqLength = document.getElementById("req-length");
+  const reqUpper = document.getElementById("req-upper");
+  const reqLower = document.getElementById("req-lower");
+  const reqNumber = document.getElementById("req-number");
+  const reqMatch = document.getElementById("req-match");
+  const strengthBar = document.getElementById("strength-bar");
+  const strengthText = document.getElementById("strength-text");
+
+  function actualizarFortaleza() {
+    const pass = newPass.value;
+    const confirm = confirmPass.value;
+    let score = 0;
+
+    if (pass.length >= 6) { reqLength.classList.add("valid"); score++; } else reqLength.classList.remove("valid");
+    if (/[A-Z]/.test(pass)) { reqUpper.classList.add("valid"); score++; } else reqUpper.classList.remove("valid");
+    if (/[a-z]/.test(pass)) { reqLower.classList.add("valid"); score++; } else reqLower.classList.remove("valid");
+    if (/\d/.test(pass)) { reqNumber.classList.add("valid"); score++; } else reqNumber.classList.remove("valid");
+    if (pass === confirm && pass !== "") { reqMatch.classList.add("valid"); score++; } else reqMatch.classList.remove("valid");
+
+    const porcent = (score / 5) * 100;
+    strengthBar.style.width = porcent + "%";
+    strengthBar.style.backgroundColor = porcent < 40 ? "#f87171" : porcent < 80 ? "#facc15" : "#16a34a";
+    strengthText.textContent = porcent < 40 ? "Débil" : porcent < 80 ? "Media" : "Fuerte";
+  }
+
+  newPass.addEventListener("input", actualizarFortaleza);
+  confirmPass.addEventListener("input", actualizarFortaleza);
+}
+
+  }
 });
 
