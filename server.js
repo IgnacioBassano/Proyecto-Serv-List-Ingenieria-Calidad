@@ -63,9 +63,7 @@ app.get("/api/servicios", async (req, res) => {
       const servicio = await prisma.servicio.findUnique({
         where: { id: Number(servicioId) },
       });
-      if (!servicio) {
-        return res.status(404).json({ error: "Servicio no encontrado" });
-      }
+      if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
       where.usuarioId = servicio.usuarioId;
     }
 
@@ -92,7 +90,7 @@ app.get("/api/servicios", async (req, res) => {
 });
 
 // =============================
-// 📋 Obtener servicios del usuario autenticado
+// 📋 Servicios del usuario autenticado
 // =============================
 app.get("/api/servicios/mios", verificarToken, async (req, res) => {
   try {
@@ -108,7 +106,7 @@ app.get("/api/servicios/mios", verificarToken, async (req, res) => {
   }
 });
 
-// 🧑‍🔧 Obtener un servicio por ID
+// 🧑‍🔧 Obtener servicio por ID
 app.get("/api/servicios/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (!id || isNaN(id)) return res.status(400).json({ error: "ID inválido" });
@@ -119,12 +117,19 @@ app.get("/api/servicios/:id", async (req, res) => {
       include: {
         usuario: true,
         items: true,
-        resenas: true // 👈 corregido: SIN ñ
+        resenas: true,
       },
     });
 
-    if (!servicio)
-      return res.status(404).json({ error: "Servicio no encontrado" });
+    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+
+    // 🔹 Convertimos createdAt de reseñas a string ISO
+    if (servicio.resenas?.length) {
+      servicio.resenas = servicio.resenas.map(r => ({
+        ...r,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt
+      }));
+    }
 
     res.json(servicio);
   } catch (err) {
@@ -133,23 +138,39 @@ app.get("/api/servicios/:id", async (req, res) => {
   }
 });
 
-
 // =============================
 // ✏️ Crear servicio
 // =============================
 app.post("/api/servicios", verificarToken, async (req, res) => {
   const { titulo, categoria, ubicacion, comentario, imagen, email, descripcion, items } = req.body;
 
-  if (!titulo || !categoria || !ubicacion || !comentario)
-    return res.status(400).json({ error: "Campos obligatorios: titulo, categoria, ubicacion y comentario" });
+  // ✅ Validar campos obligatorios (CP1 y CP2)
+  if (!titulo || !categoria || !ubicacion || !comentario) {
+    return res.status(400).json({ error: "Campos obligatorios: título, categoría, ubicación y comentario" });
+  }
+
+// ✅ Validar formato de imagen o URL (CP3)
+if (
+  imagen &&
+  !/^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i.test(imagen) && // URL válida
+  !/\.(jpg|jpeg|png|gif)$/i.test(imagen) // archivo local válido
+) {
+  return res.status(400).json({
+    error: "Formato de imagen no válido. Solo se permiten imágenes JPG, JPEG, PNG o GIF, ya sea por archivo o URL.",
+  });
+}
+
+  // ✅ Limpiar texto de posibles caracteres peligrosos (CP4)
+  const cleanTitulo = titulo.replace(/[<>]/g, "").trim();
+  const cleanComentario = comentario.replace(/[<>]/g, "").trim();
 
   try {
     const creado = await prisma.servicio.create({
       data: {
-        titulo,
+        titulo: cleanTitulo,
         categoria,
         ubicacion,
-        comentario,
+        comentario: cleanComentario,
         descripcion: descripcion || "",
         imagen: imagen || imagenPorCategoria[categoria] || "/assets/placeholder.jpg",
         email: email || req.user.email,
@@ -169,7 +190,7 @@ app.post("/api/servicios", verificarToken, async (req, res) => {
 });
 
 // =============================
-// ✏️ Editar servicio por ID
+// ✏️ Editar servicio
 // =============================
 app.put("/api/servicios/:id", verificarToken, async (req, res) => {
   try {
@@ -183,7 +204,6 @@ app.put("/api/servicios/:id", verificarToken, async (req, res) => {
     const servicio = await prisma.servicio.findUnique({ where: { id } });
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
-    // ✅ Validar que el servicio pertenece al usuario
     if (servicio.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
       return res.status(403).json({ error: "No tienes permiso para editar este servicio" });
     }
@@ -201,22 +221,19 @@ app.put("/api/servicios/:id", verificarToken, async (req, res) => {
 });
 
 // =============================
-// 🗑️ Eliminar servicio por ID
+// 🗑️ Eliminar servicio
 // =============================
 app.delete("/api/servicios/:id", verificarToken, async (req, res) => {
   try {
     const id = Number(req.params.id);
-
     const servicio = await prisma.servicio.findUnique({ where: { id } });
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
-    // ✅ Validar que el servicio pertenece al usuario autenticado
     if (servicio.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
       return res.status(403).json({ error: "No tienes permiso para eliminar este servicio" });
     }
 
     await prisma.servicio.delete({ where: { id } });
-
     res.json({ message: "🗑️ Servicio eliminado correctamente" });
   } catch (error) {
     console.error("❌ Error al eliminar servicio:", error);
@@ -224,27 +241,20 @@ app.delete("/api/servicios/:id", verificarToken, async (req, res) => {
   }
 });
 
-
 // =============================
 // 🗓️ TURNOS
 // =============================
 app.post("/api/turnos", async (req, res) => {
   const { nombre, email, fecha, detalle, servicioId } = req.body;
 
-  if (!nombre || !email)
-    return res.status(400).json({ error: "Campos obligatorios: nombre y email." });
-
-  if (!servicioId)
-    return res.status(400).json({ error: "Falta el ID del servicio asociado." });
+  if (!nombre || !email) return res.status(400).json({ error: "Campos obligatorios: nombre y email." });
+  if (!servicioId) return res.status(400).json({ error: "Falta el ID del servicio asociado." });
 
   try {
     const servicio = await prisma.servicio.findUnique({
       where: { id: Number(servicioId) },
-      include: { usuario: true },
     });
-
-    if (!servicio)
-      return res.status(404).json({ error: "Servicio no encontrado." });
+    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado." });
 
     const turno = await prisma.turno.create({
       data: {
@@ -256,11 +266,12 @@ app.post("/api/turnos", async (req, res) => {
       },
     });
 
-    console.log(`📅 Nuevo turno creado para servicio #${servicioId} (${servicio.titulo})`);
-
     res.status(201).json({
       message: "✅ Turno creado correctamente",
-      turno,
+      turno: {
+        ...turno,
+        fecha: turno.fecha ? turno.fecha.toISOString() : null
+      },
     });
   } catch (err) {
     console.error("❌ Error al crear turno:", err);
@@ -268,47 +279,39 @@ app.post("/api/turnos", async (req, res) => {
   }
 });
 
-// 📋 Obtener turnos del prestador logueado
+// Obtener turnos del prestador
 app.get("/api/turnos/mios", verificarToken, async (req, res) => {
   try {
     const turnos = await prisma.turno.findMany({
       where: { servicio: { usuarioId: req.user.id } },
-      include: {
-        servicio: {
-          select: { titulo: true, categoria: true, ubicacion: true },
-        },
-      },
+      include: { servicio: { select: { titulo: true, categoria: true, ubicacion: true } } },
       orderBy: { createdAt: "desc" },
     });
 
-    const data = turnos.map((t) => ({
+    res.json(turnos.map(t => ({
       id: t.id,
       nombre: t.nombre,
       email: t.email,
       detalle: t.detalle,
-      fecha: t.fecha,
+      fecha: t.fecha ? t.fecha.toISOString() : null,
       estado: t.estado || "pendiente",
       servicio: t.servicio?.titulo || "Sin servicio",
       categoria: t.servicio?.categoria,
       ubicacion: t.servicio?.ubicacion,
-    }));
-
-    res.json(data);
+    })));
   } catch (error) {
-    console.error("❌ Error al obtener turnos del prestador:", error);
+    console.error("❌ Error al obtener turnos:", error);
     res.status(500).json({ error: "Error al obtener los turnos" });
   }
 });
 
-// 🔄 Cambiar estado del turno
+// Cambiar estado del turno
 app.put("/api/turnos/:id/estado", verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { estado } = req.body;
-
-    if (!["pendiente", "confirmado", "cancelado"].includes(estado)) {
+    if (!["pendiente", "confirmado", "cancelado"].includes(estado))
       return res.status(400).json({ error: "Estado inválido" });
-    }
 
     const turno = await prisma.turno.findUnique({
       where: { id: Number(id) },
@@ -316,9 +319,8 @@ app.put("/api/turnos/:id/estado", verificarToken, async (req, res) => {
     });
 
     if (!turno) return res.status(404).json({ error: "Turno no encontrado" });
-    if (turno.servicio?.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
+    if (turno.servicio?.usuarioId !== req.user.id && req.user.rol !== "ADMIN")
       return res.status(403).json({ error: "No autorizado" });
-    }
 
     const actualizado = await prisma.turno.update({
       where: { id: Number(id) },
@@ -333,7 +335,7 @@ app.put("/api/turnos/:id/estado", verificarToken, async (req, res) => {
 });
 
 // =============================
-// 🧾 RESEÑAS (ahora sin ñ → /api/resenas)
+// 🧾 RESEÑAS
 // =============================
 app.get("/api/resenas/servicio/:id", async (req, res) => {
   try {
@@ -342,7 +344,11 @@ app.get("/api/resenas/servicio/:id", async (req, res) => {
       where: { servicioId: Number(id) },
       orderBy: { createdAt: "desc" },
     });
-    res.json(resenas);
+
+    res.json(resenas.map(r => ({
+      ...r,
+      createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt
+    })));
   } catch (error) {
     console.error("❌ Error al obtener reseñas:", error);
     res.status(500).json({ error: "Error al obtener reseñas" });
@@ -357,12 +363,8 @@ app.post("/api/resenas", async (req, res) => {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
 
-    const servicio = await prisma.servicio.findUnique({
-      where: { id: Number(servicioId) },
-    });
-    if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado" });
-    }
+    const servicio = await prisma.servicio.findUnique({ where: { id: Number(servicioId) } });
+    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
     const nuevaResena = await prisma.resena.create({
       data: {
@@ -386,7 +388,7 @@ app.post("/api/resenas", async (req, res) => {
 
     res.status(201).json({
       message: "✅ Reseña enviada correctamente y rating actualizado",
-      resena: nuevaResena,
+      resena: { ...nuevaResena, createdAt: nuevaResena.createdAt.toISOString() },
       nuevoRating: promedio._avg.puntaje,
     });
   } catch (error) {
@@ -399,38 +401,56 @@ app.get("/api/resenas/mias", verificarToken, async (req, res) => {
   try {
     const resenas = await prisma.resena.findMany({
       where: { servicio: { usuarioId: req.user.id } },
-      include: {
-        servicio: { select: { titulo: true, categoria: true } },
-      },
+      include: { servicio: { select: { titulo: true, categoria: true } } },
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(
-      resenas.map((r) => ({
-        id: r.id,
-        servicio: r.servicio?.titulo || "Sin servicio",
-        categoria: r.servicio?.categoria || "",
-        nombre: r.nombre,
-        email: r.email,
-        comentario: r.comentario,
-        puntaje: r.puntaje,
-        fecha: r.createdAt,
-      }))
-    );
+    res.json(resenas.map(r => ({
+      id: r.id,
+      servicio: r.servicio?.titulo || "Sin servicio",
+      categoria: r.servicio?.categoria || "",
+      nombre: r.nombre,
+      email: r.email,
+      comentario: r.comentario,
+      puntaje: r.puntaje,
+      fecha: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+    })));
+  } catch (error) {
+    console.error("❌ Error al obtener reseñas del prestador:", error);
+    res.status(500).json({ error: "Error al obtener reseñas" });
+  }
+});app.get("/api/resenas/mias", verificarToken, async (req, res) => {
+  try {
+    const resenas = await prisma.resena.findMany({
+      where: { servicio: { usuarioId: req.user.id } },
+      include: { servicio: { select: { titulo: true, categoria: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const resenasFormateadas = resenas.map(r => ({
+      id: r.id,
+      servicio: r.servicio?.titulo || "Sin servicio",
+      categoria: r.servicio?.categoria || "",
+      nombre: r.nombre,
+      email: r.email,
+      comentario: r.comentario,
+      puntaje: r.puntaje,
+      fecha: r.createdAt ? new Date(r.createdAt).toISOString() : null // ✅ clave
+    }));
+
+    res.json(resenasFormateadas);
   } catch (error) {
     console.error("❌ Error al obtener reseñas del prestador:", error);
     res.status(500).json({ error: "Error al obtener reseñas" });
   }
 });
 
+
 // =============================
 // 🚀 Servidor y frontend
 // =============================
 app.get("*", (req, res) => {
-  // No interceptar rutas de la API
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({ error: "Ruta API no encontrada" });
-  }
+  if (req.path.startsWith("/api/")) return res.status(404).json({ error: "Ruta API no encontrada" });
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 

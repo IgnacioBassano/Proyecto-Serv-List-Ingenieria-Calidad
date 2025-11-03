@@ -20,7 +20,7 @@ function authMiddleware(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "clave_secreta_dev");
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch {
     return res.status(403).json({ error: "Token inválido o expirado" });
   }
 }
@@ -57,6 +57,7 @@ router.post("/register", async (req, res) => {
       },
     });
 
+    // eslint-disable-next-line no-unused-vars
     const { password: _, ...safeUser } = usuario;
     res.status(201).json({ message: "Usuario registrado con éxito", usuario: safeUser });
   } catch (error) {
@@ -154,7 +155,7 @@ router.put("/update", authMiddleware, async (req, res) => {
       where: { id: Number(id) },
       data: { nombre, email, telefono, localidad, imagen },
     });
-
+// eslint-disable-next-line no-unused-vars
     const { password, ...safeUser } = usuario;
     res.json({ message: "✅ Datos actualizados correctamente", usuario: safeUser });
   } catch (error) {

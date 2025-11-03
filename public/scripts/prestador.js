@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const contenedor = document.getElementById("prestador-view");
 
   if (!servicioId) {
-    contenedor.innerHTML = `<p class="muted">⚠️ Servicio no especificado.</p>`;
+    contenedor.innerHTML = "<p class=\"muted\">⚠️ Servicio no especificado.</p>";
     return;
   }
 
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ✅ Render del perfil, servicio, turnos y reseñas
     contenedor.innerHTML = `
       <section class="prestador-header">
-        <img src="${prestador.imagen || '/assets/avatar-placeholder.png'}" class="prestador-foto" alt="${prestador.nombre}">
+        <img src="${prestador.imagen || "/assets/avatar-placeholder.png"}" class="prestador-foto" alt="${prestador.nombre}">
         <div class="prestador-info">
           <h1>${prestador.nombre}</h1>
           <p><strong>Email:</strong> ${prestador.email}</p>
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   } catch (err) {
     console.error("❌ Error al cargar perfil:", err);
-    contenedor.innerHTML = `<p class="muted">❌ Error al cargar el perfil del prestador.</p>`;
+    contenedor.innerHTML = "<p class=\"muted\">❌ Error al cargar el perfil del prestador.</p>";
   }
 });
 

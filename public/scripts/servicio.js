@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     contenedor.innerHTML = `
       <div class="servicio-info">
-        <img src="${servicio.imagen || '/assets/placeholder.jpg'}" alt="servicio" class="servicio-img">
+        <img src="${servicio.imagen || "/assets/placeholder.jpg"}" alt="servicio" class="servicio-img">
         <div>
           <h1>${servicio.titulo}</h1>
           <p><strong>Categoría:</strong> ${servicio.categoria}</p>
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     turnoSection.style.display = "block";
   } catch (err) {
     console.error("❌ Error al cargar servicio:", err);
-    contenedor.innerHTML = `<p class='muted'>⚠️ No se pudo cargar el servicio.</p>`;
+    contenedor.innerHTML = "<p class='muted'>⚠️ No se pudo cargar el servicio.</p>";
   }
 
   // 🗓️ Enviar turno

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
         rol = usuario.rol;
         localStorage.setItem("rol", rol);
       }
-    } catch (e) {
+    } catch {
       console.warn("⚠️ No se pudo obtener el rol del usuario.");
     }
   }
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <a href="perfil.html">Mi Perfil</a>
       ${
         rol === "PRESTADOR"
-          ? `<a href="publicar-servicio.html" class="btn btn-publicar">🛠 Publicar</a>`
+          ? "<a href=\"publicar-servicio.html\" class=\"btn btn-publicar\">🛠 Publicar</a>"
           : ""
       }
       <button id="logout" class="btn logout-btn">Cerrar Sesión</button>

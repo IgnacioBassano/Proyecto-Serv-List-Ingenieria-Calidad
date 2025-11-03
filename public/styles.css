@@ -1445,3 +1445,26 @@ html.dark .reseña-item {
   border-color: #f59e0b;
   color: #f5f5f5;
 }
+
+/* ===============================
+   🔒 Requisitos de contraseña - Fix
+=============================== */
+
+#req-length,
+#req-upper,
+#req-lower,
+#req-number,
+#req-match {
+  color: #dc2626; /* rojo por defecto */
+  transition: color 0.3s ease;
+}
+
+/* cuando se cumple el requisito */
+#req-length.valid,
+#req-upper.valid,
+#req-lower.valid,
+#req-number.valid,
+#req-match.valid {
+  color: #16a34a !important; /* verde fuerte */
+  font-weight: 600;
+}

@@ -1,6 +1,6 @@
-import express from "express";
-import { PrismaClient } from "@prisma/client";
-import { verificarToken } from "../middlewares/auth.js";
+const express = require("express");
+const { PrismaClient } = require("@prisma/client");
+const { verificarToken } = require("../middlewares/auth");
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -143,4 +143,4 @@ router.get("/prestador/:id", verificarToken, async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

@@ -27,7 +27,6 @@ function servicioCardLink(s) {
   </a>`;
 }
 
-
 // ============================
 // 🔍 Buscar servicios
 // ============================
@@ -64,6 +63,9 @@ async function buscarServicios(params) {
   }
 }
 
+// ============================
+// Cargar prestador
+// ============================
 async function cargarPrestadorDesdeQuery() {
   const root = document.getElementById("prestador-view");
   if (!root || root.dataset.rendered === "1") return;
@@ -72,12 +74,11 @@ async function cargarPrestadorDesdeQuery() {
   const params = new URLSearchParams(location.search);
   const id = params.get("id");
   if (!id) {
-    root.innerHTML = `<p class="muted">❌ Falta el parámetro <code>id</code>.</p>`;
+    root.innerHTML = "<p class=\"muted\">❌ Falta el parámetro <code>id</code>.</p>";
     return;
   }
 
   try {
-    // 🔹 Cargamos la info del servicio y su prestador
     const res = await fetch(`/api/servicios/${encodeURIComponent(id)}`);
     if (!res.ok) throw new Error("No encontrado");
     const s = await res.json();
@@ -85,12 +86,12 @@ async function cargarPrestadorDesdeQuery() {
     root.innerHTML = `
       <section class="prestador-perfil">
         <div class="prestador-header">
-          <img src="${s.imagen || '/assets/placeholder.jpg'}" alt="${s.titulo}" class="prestador-foto">
+          <img src="${s.imagen || "/assets/placeholder.jpg"}" alt="${s.titulo}" class="prestador-foto">
           <div class="prestador-info">
             <h1>${s.titulo}</h1>
             <p class="muted">${s.categoria} · ${s.ubicacion}</p>
             <p id="rating-text" class="rating">${s.rating?.toFixed(1) ?? "—"} ★</p>
-            <p>📧 <a href="mailto:${s.email || 'contacto@example.com'}">${s.email || 'contacto@example.com'}</a></p>
+            <p>📧 <a href="mailto:${s.email || "contacto@example.com"}">${s.email || "contacto@example.com"}</a></p>
           </div>
         </div>
 
@@ -164,21 +165,27 @@ async function cargarPrestadorDesdeQuery() {
     // ⭐ Mostrar reseñas existentes
     // =============================
     const lista = document.getElementById("lista-reseñas");
-    const reseñasRes = await fetch(`/api/reseñas/servicio/${s.id}`);
+    const reseñasRes = await fetch(`/api/resenas/servicio/${s.id}`);
     const reseñas = await reseñasRes.json();
 
     if (reseñas.length) {
       lista.innerHTML = reseñas
-        .map(r => `
-          <li class="reseña-item">
-            <p><strong>${r.nombre}</strong> (${r.email})</p>
-            <p>⭐ ${r.puntaje}/5</p>
-            <p>${r.comentario}</p>
-            <p class="muted">${new Date(r.createdAt).toLocaleDateString()}</p>
-          </li>
-        `).join("");
+        .map(r => {
+          // 🔹 Normalizamos la fecha segura
+          const fecha = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "Sin fecha";
+
+          return `
+            <li class="reseña-item">
+              <p><strong>${r.nombre}</strong> (${r.email})</p>
+              <p>⭐ ${r.puntaje}/5</p>
+              <p>${r.comentario}</p>
+              <p class="muted">${fecha}</p>
+            </li>
+          `;
+        })
+        .join("");
     } else {
-      lista.innerHTML = `<p class="muted">Aún no hay reseñas para este servicio.</p>`;
+      lista.innerHTML = "<p class=\"muted\">Aún no hay reseñas para este servicio.</p>";
     }
 
     // =============================
@@ -191,7 +198,7 @@ async function cargarPrestadorDesdeQuery() {
     formReseña.addEventListener("submit", async (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(formReseña));
-      const res = await fetch("/api/reseñas", {
+      const res = await fetch("/api/resenas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -203,12 +210,13 @@ async function cargarPrestadorDesdeQuery() {
         formReseña.reset();
 
         // agregar reseña nueva
+        const fechaNow = new Date().toLocaleDateString();
         const nueva = `
           <li class="reseña-item">
             <p><strong>${data.nombre}</strong> (${data.email})</p>
             <p>⭐ ${data.puntaje}/5</p>
             <p>${data.comentario}</p>
-            <p class="muted">${new Date().toLocaleDateString()}</p>
+            <p class="muted">${fechaNow}</p>
           </li>`;
         lista.innerHTML = nueva + lista.innerHTML;
 
@@ -225,10 +233,9 @@ async function cargarPrestadorDesdeQuery() {
 
   } catch (err) {
     console.error(err);
-    root.innerHTML = `<p class="muted">❌ No encontramos el servicio solicitado.</p>`;
+    root.innerHTML = "<p class=\"muted\">❌ No encontramos el servicio solicitado.</p>";
   }
 }
-
 
 // ============================
 // 🚀 Inicialización general
@@ -249,53 +256,44 @@ window.addEventListener("DOMContentLoaded", () => {
     buscarServicios({});
   }
 
-  // ============================
-// 📤 Publicar servicio (publicar-servicio.html)
-// ============================
-const fp = document.getElementById("form-publicar");
-if (fp) {
-  fp.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("⚠️ Tenés que iniciar sesión para publicar un servicio.");
-      window.location.href = "iniciar-sesion.html";
-      return;
-    }
-
-    const form = new FormData(fp);
-    const payload = Object.fromEntries(form.entries());
-
-    // Convertir lista de items en array
-    if (payload.items) {
-      payload.items = payload.items.split(",").map(s => s.trim()).filter(Boolean);
-    }
-
-    try {
-      const res = await fetch("/api/servicios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // ✅ envío del token
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const json = await res.json();
-
-      if (res.ok) {
-        document.getElementById("publicado-ok").style.display = "block";
-        fp.reset();
-      } else {
-        alert("⚠️ " + (json.error || "Error al publicar el servicio"));
+  // Publicar servicio (publicar-servicio.html)
+  const fp = document.getElementById("form-publicar");
+  if (fp) {
+    fp.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("⚠️ Tenés que iniciar sesión para publicar un servicio.");
+        window.location.href = "iniciar-sesion.html";
+        return;
       }
-    } catch (err) {
-      console.error("❌ Error al publicar:", err);
-      alert("❌ No se pudo conectar con el servidor.");
-    }
-  });
-}
+      const form = new FormData(fp);
+      const payload = Object.fromEntries(form.entries());
+      if (payload.items) {
+        payload.items = payload.items.split(",").map(s => s.trim()).filter(Boolean);
+      }
+      try {
+        const res = await fetch("/api/servicios", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (res.ok) {
+          document.getElementById("publicado-ok").style.display = "block";
+          fp.reset();
+        } else {
+          alert("⚠️ " + (json.error || "Error al publicar el servicio"));
+        }
+      } catch (err) {
+        console.error("❌ Error al publicar:", err);
+        alert("❌ No se pudo conectar con el servidor.");
+      }
+    });
+  }
 
   // Cargar prestador (prestador.html)
   cargarPrestadorDesdeQuery();

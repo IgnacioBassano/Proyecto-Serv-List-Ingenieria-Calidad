@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const avatarImg = document.getElementById("avatar-img");
   const avatarInput = document.getElementById("avatar-input");
   const form = document.getElementById("perfil-form");
-  const saveBtn = document.querySelector(".guardar-btn");
 
   const modal = document.getElementById("editar-modal");
   const cerrarModalBtn = document.getElementById("cerrar-modal");
@@ -170,7 +169,7 @@ if (avatarInput) {
       if (!res.ok || data.error) throw new Error(data.error || "Error al cargar servicios.");
 
       if (!data.length) {
-        listaServicios.innerHTML = `<p class="muted">Aún no publicaste servicios.</p>`;
+        listaServicios.innerHTML = "<p class=\"muted\">Aún no publicaste servicios.</p>";
         if (contador) contador.textContent = "0";
         return;
       }
@@ -201,7 +200,7 @@ if (avatarInput) {
         .join("");
     } catch (err) {
       console.error("❌ Error al cargar servicios:", err);
-      listaServicios.innerHTML = `<p class="muted">⚠️ No se pudieron cargar los servicios.</p>`;
+      listaServicios.innerHTML = "<p class=\"muted\">⚠️ No se pudieron cargar los servicios.</p>";
       if (contador) contador.textContent = "0";
     }
   }
@@ -301,7 +300,7 @@ if (avatarInput) {
       if (!res.ok || data.error) throw new Error(data.error || "Error al obtener reseñas");
 
       if (!data.length) {
-        contenedor.innerHTML = `<p class="muted">Aún no recibiste reseñas.</p>`;
+        contenedor.innerHTML = "<p class=\"muted\">Aún no recibiste reseñas.</p>";
         return;
       }
 
@@ -321,7 +320,7 @@ if (avatarInput) {
         .join("");
     } catch (err) {
       console.error("❌ Error al cargar reseñas recibidas:", err);
-      contenedor.innerHTML = `<p class="muted">⚠️ No se pudieron cargar tus reseñas.</p>`;
+      contenedor.innerHTML = "<p class=\"muted\">⚠️ No se pudieron cargar tus reseñas.</p>";
     }
   }
 
