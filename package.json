@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "lint": "eslint . --ext .js"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
@@ -22,3 +23,4 @@
     "prisma": "^6.15.0"
   }
 }
+

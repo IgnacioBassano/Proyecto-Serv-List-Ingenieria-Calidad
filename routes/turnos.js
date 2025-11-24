@@ -21,21 +21,26 @@ router.get("/mios", verificarToken, async (req, res) => {
     });
 
     const data = turnos.map((t) => ({
-      id: t.id,
-      fecha: t.fecha,
-      hora: t.fecha ? new Date(t.fecha).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) : "-",
-      comentario: t.detalle,
-      estado: t.estado || "pendiente",
-      servicio: {
-        titulo: t.servicio?.titulo || "Sin servicio",
-        categoria: t.servicio?.categoria || "",
-        ubicacion: t.servicio?.ubicacion || "",
-      },
-      cliente: {
-        nombre: t.nombre,
-        email: t.email,
-      },
-    }));
+  id: t.id,
+  fecha: t.fecha,
+  hora: t.fecha
+    ? new Date(t.fecha).toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "-",
+  comentario: t.detalle,
+  estado: t.estado || "pendiente",
+
+  // 👉 CORRECCIÓN AQUÍ
+  servicio: t.servicio?.titulo || "Sin servicio",
+
+  cliente: {
+    nombre: t.nombre,
+    email: t.email,
+  },
+}));
+
 
     res.json(data);
   } catch (error) {

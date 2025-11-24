@@ -758,9 +758,14 @@ textarea:focus {
 /* Descripción — truncada para igualar alturas */
 .card p:last-of-type {
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* máx. 3 líneas */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+-webkit-box-orient: vertical;
+-webkit-line-clamp: 2;
+
+/* Propiedad estándar recomendada */
+line-clamp: 2;
+
+overflow: hidden;
+
   text-overflow: ellipsis;
 }
 

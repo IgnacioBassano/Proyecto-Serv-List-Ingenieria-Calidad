@@ -43,7 +43,10 @@
       <div class="perfil-resumen">
         <p><strong>📍 Localidad:</strong> <span id="localidad-resumen">—</span></p>
         <p><strong>📞 Teléfono:</strong> <span id="telefono-resumen">—</span></p>
-        <p><strong>🛠️ Servicios publicados:</strong> <span id="servicios-count">0</span></p>
+        <p>
+          <strong id="servicios-label">🛠️ Servicios publicados:</strong>
+          <span id="servicios-count">0</span>
+        </p>
       </div>
     </aside>
 
@@ -97,7 +100,7 @@
         </form>
       </div>
 
-      <!-- SERVICIOS -->
+      <!-- SERVICIOS (solo prestador) -->
       <div id="servicios" class="tab-content" style="display:none;">
         <h2>Mis servicios</h2>
         <ul class="servicios-list"></ul>
@@ -133,22 +136,22 @@
           </ul>
 
           <button type="submit" id="btn-password" class="btn" style="margin-top:18px;">
-          Actualizar contraseña
+            Actualizar contraseña
           </button>
         </form>
       </div>
 
       <!-- TURNOS -->
       <div id="turnos" class="tab-content" style="display:none;">
-        <h2>Mis turnos</h2>
+        <h2>Mis turnos reservados</h2>
         <ul id="lista-turnos" class="servicios-list"></ul>
       </div>
 
       <!-- RESEÑAS -->
-<div id="reseñas" class="tab-content" style="display:none;">
-  <h2>Reseñas recibidas</h2>
-  <ul id="lista-resenas" class="servicios-list"></ul>
-</div>
+      <div id="reseñas" class="tab-content" style="display:none;">
+        <h2 id="titulo-reseñas">Reseñas</h2>
+        <ul id="lista-resenas" class="servicios-list"></ul>
+      </div>
 
     </section>
   </main>
@@ -191,3 +194,4 @@
   <script src="scripts/perfil.js"></script>
 </body>
 </html>
+

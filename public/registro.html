@@ -51,13 +51,43 @@
       </label>
 
       <label>
-       <span>Contraseña</span>
-       <input type="password" name="password" id="password" placeholder="Contraseña" required />
-       <div id="password-strength">
-         <div id="strength-bar"></div>
-         <small id="strength-text">Ingresa una contraseña</small>
-       </div>
-     </label>
+        <span>Contraseña</span>
+        <input type="password" name="password" id="password" placeholder="Contraseña" required />
+        <div id="password-strength">
+          <div id="strength-bar"></div>
+          <small id="strength-text">Ingresa una contraseña</small>
+        </div>
+      </label>
+
+      <!-- CAMPO CONFIRMAR CONTRASEÑA -->
+      <label>
+        <span>Confirmar contraseña</span>
+        <input type="password" name="confirmPassword" placeholder="Repite la contraseña" required />
+      </label>
+
+      <!-- REQUISITOS DE CONTRASEÑA -->
+      <ul id="password-requisitos">
+        <li id="req-length" class="invalid">Mínimo 6 caracteres</li>
+        <li id="req-mayus" class="invalid">Al menos una mayúscula</li>
+        <li id="req-minus" class="invalid">Al menos una minúscula</li>
+        <li id="req-num" class="invalid">Al menos un número</li>
+      </ul>
+
+      <!-- 🔽 SELECTOR DE ROL AGREGADO 🔽 -->
+      <fieldset class="rol-selector" style="margin-top: 18px;">
+        <legend>Registrarme como:</legend>
+
+        <label style="display:flex; align-items:center; gap:6px; margin-top:5px;">
+          <input type="radio" name="rol" value="CLIENTE" checked />
+          Cliente (quiero contratar servicios)
+        </label>
+
+        <label style="display:flex; align-items:center; gap:6px; margin-top:3px;">
+          <input type="radio" name="rol" value="PRESTADOR" />
+          Prestador (quiero ofrecer mis servicios)
+        </label>
+      </fieldset>
+      <!-- 🔼 SELECTOR DE ROL 🔼 -->
 
       <button class="btn" type="submit">Registrarme</button>
     </form>
@@ -85,41 +115,23 @@
       const form = document.getElementById("registroForm");
       const msg = document.getElementById("msg");
 
-      // Crear lista de requisitos
       const passwordInput = form.querySelector('input[name="password"]');
-      const container = passwordInput.parentElement;
-      const requisitos = document.createElement("ul");
-      requisitos.id = "password-requisitos";
-      requisitos.innerHTML = `
-        <li id="req-length" class="invalid">Mínimo 6 caracteres</li>
-        <li id="req-mayus" class="invalid">Al menos una mayúscula</li>
-        <li id="req-minus" class="invalid">Al menos una minúscula</li>
-        <li id="req-num" class="invalid">Al menos un número</li>
-      `;
-      container.appendChild(requisitos);
+      const confirmInput  = form.querySelector('input[name="confirmPassword"]');
 
-      // Campo de confirmación
-      const confirmLabel = document.createElement("label");
-      confirmLabel.innerHTML = `
-        <span>Confirmar contraseña</span>
-        <input type="password" name="confirmPassword" placeholder="Repite la contraseña" required />
-      `;
-      form.insertBefore(confirmLabel, form.querySelector("button.btn"));
-
-      const confirmInput = confirmLabel.querySelector("input");
       const reqs = {
         length: document.getElementById("req-length"),
         mayus: document.getElementById("req-mayus"),
         minus: document.getElementById("req-minus"),
-        num: document.getElementById("req-num"),
+        num:   document.getElementById("req-num"),
       };
 
+      // Validación dinámica de requisitos
       passwordInput.addEventListener("input", () => {
         const val = passwordInput.value;
         reqs.length.className = val.length >= 6 ? "valid" : "invalid";
-        reqs.mayus.className = /[A-Z]/.test(val) ? "valid" : "invalid";
-        reqs.minus.className = /[a-z]/.test(val) ? "valid" : "invalid";
-        reqs.num.className = /\d/.test(val) ? "valid" : "invalid";
+        reqs.mayus.className  = /[A-Z]/.test(val) ? "valid" : "invalid";
+        reqs.minus.className  = /[a-z]/.test(val) ? "valid" : "invalid";
+        reqs.num.className    = /\d/.test(val)   ? "valid" : "invalid";
       });
 
       form.addEventListener("submit", async (e) => {
@@ -130,15 +142,19 @@
         const data = Object.fromEntries(new FormData(form));
         const { password, confirmPassword } = data;
 
-        // Validación básica antes de enviar
-        if (password.length < 6 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
-          msg.textContent = "⚠️ La contraseña no cumple los requisitos.";
+        if (password !== confirmPassword) {
+          msg.textContent = "⚠️ Las contraseñas no coinciden.";
           msg.style.color = "red";
           return;
         }
 
-        if (password !== confirmPassword) {
-          msg.textContent = "⚠️ Las contraseñas no coinciden.";
+        if (
+          password.length < 6 ||
+          !/[A-Z]/.test(password) ||
+          !/[a-z]/.test(password) ||
+          !/\d/.test(password)
+        ) {
+          msg.textContent = "⚠️ La contraseña no cumple los requisitos.";
           msg.style.color = "red";
           return;
         }
@@ -155,7 +171,7 @@
 
           const json = await res.json();
           if (res.ok) {
-            msg.textContent = "✅ Registro exitoso. Ahora puedes iniciar sesión.";
+            msg.textContent = "✅ Registro exitoso. Redirigiendo...";
             msg.style.color = "green";
             form.reset();
             setTimeout(() => (window.location.href = "iniciar-sesion.html"), 1500);
@@ -171,58 +187,44 @@
     });
   </script>
 
+  <!-- 🔒 Medidor de fortaleza de contraseña -->
   <script>
-  // ============================
-  // 🔒 Medidor de fortaleza de contraseña
-  // ============================
-  const passwordInput = document.getElementById("password");
-  const strengthBar = document.getElementById("strength-bar");
-  const strengthText = document.getElementById("strength-text");
+    const passwordInput = document.getElementById("password");
+    const strengthBar = document.getElementById("strength-bar");
+    const strengthText = document.getElementById("strength-text");
 
-  passwordInput.addEventListener("input", () => {
-    const value = passwordInput.value;
-    let strength = 0;
+    passwordInput.addEventListener("input", () => {
+      const value = passwordInput.value;
+      let strength = 0;
 
-    // Criterios básicos
-    if (value.length >= 6) strength++;
-    if (/[A-Z]/.test(value)) strength++;
-    if (/[a-z]/.test(value)) strength++;
-    if (/\d/.test(value)) strength++;
-    if (/[^A-Za-z0-9]/.test(value)) strength++;
+      if (value.length >= 6) strength++;
+      if (/[A-Z]/.test(value)) strength++;
+      if (/[a-z]/.test(value)) strength++;
+      if (/\d/.test(value)) strength++;
+      if (/[^A-Za-z0-9]/.test(value)) strength++;
 
-    // Evaluar fuerza
-    let color = "#d1d5db"; // gris neutro
-    let text = "Ingresa una contraseña";
+      let color = "#d1d5db";
+      let text = "Ingresa una contraseña";
 
-    switch (strength) {
-      case 0:
-      case 1:
-        color = "#dc2626"; // rojo
-        text = "Muy débil";
-        break;
-      case 2:
-        color = "#f97316"; // naranja
-        text = "Débil";
-        break;
-      case 3:
-        color = "#eab308"; // amarillo
-        text = "Regular";
-        break;
-      case 4:
-        color = "#22c55e"; // verde medio
-        text = "Fuerte";
-        break;
-      case 5:
-        color = "#16a34a"; // verde oscuro
-        text = "Muy fuerte";
-        break;
-    }
+      switch (strength) {
+        case 0:
+        case 1:
+          color = "#dc2626"; text = "Muy débil"; break;
+        case 2:
+          color = "#f97316"; text = "Débil"; break;
+        case 3:
+          color = "#eab308"; text = "Regular"; break;
+        case 4:
+          color = "#22c55e"; text = "Fuerte"; break;
+        case 5:
+          color = "#16a34a"; text = "Muy fuerte"; break;
+      }
 
-    strengthBar.style.width = (strength * 20) + "%";
-    strengthBar.style.backgroundColor = color;
-    strengthText.textContent = text;
-  });
-</script>
+      strengthBar.style.width = (strength * 20) + "%";
+      strengthBar.style.backgroundColor = color;
+      strengthText.textContent = text;
+    });
+  </script>
 
 </body>
 </html>

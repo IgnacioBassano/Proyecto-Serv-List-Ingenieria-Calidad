@@ -26,24 +26,55 @@ function authMiddleware(req, res, next) {
 }
 
 // ============================================================
-// 🧩 Registro de usuario
+// 🧩 Registro de usuario (CORREGIDO)
 // ============================================================
+// routes/usuario.js  (sólo la parte de /register)
 router.post("/register", async (req, res) => {
   try {
-    const { nombre, apellido, email, password, confirmPassword } = req.body;
+    const {
+      nombre,
+      apellido,
+      email,
+      password,
+      confirmPassword,
+      rol,
+    } = req.body;
 
-    if (!nombre || !apellido || !email || !password)
-      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+    if (!nombre || !apellido || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios" });
+    }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "Formato de email inválido" });
+    }
 
-    if (confirmPassword && password !== confirmPassword)
-      return res.status(400).json({ error: "Las contraseñas no coinciden" });
+    if (confirmPassword && password !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ error: "Las contraseñas no coinciden" });
+    }
 
-    const existente = await prisma.usuario.findUnique({ where: { email } });
-    if (existente)
-      return res.status(400).json({ error: "El correo ya está registrado" });
+    // ✅ Normalizar rol: CLIENTE / PRESTADOR (default CLIENTE)
+    let rolFinal = "CLIENTE";
+    if (typeof rol === "string") {
+      const r = rol.toUpperCase().trim();
+      if (r === "CLIENTE" || r === "PRESTADOR") {
+        rolFinal = r;
+      }
+    }
+
+    // ✅ Chequear antes si ya existe ese email
+    const existente = await prisma.usuario.findUnique({
+      where: { email },
+    });
+
+    if (existente) {
+      return res
+        .status(400)
+        .json({ error: "El correo ya está registrado" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -53,16 +84,30 @@ router.post("/register", async (req, res) => {
         apellido,
         email,
         password: hashedPassword,
-        rol: "PRESTADOR",
+        rol: rolFinal,
       },
     });
 
-    // eslint-disable-next-line no-unused-vars
-    const { password: _, ...safeUser } = usuario;
-    res.status(201).json({ message: "Usuario registrado con éxito", usuario: safeUser });
+    /* eslint-disable no-unused-vars */
+const { password: _omit, ...safeUser } = usuario;
+/* eslint-enable no-unused-vars */
+
+    return res
+      .status(201)
+      .json({ message: "Usuario registrado con éxito", usuario: safeUser });
   } catch (error) {
     console.error("❌ Error en /register:", error);
-    res.status(500).json({ error: "Error interno en el servidor" });
+
+    // 🔁 Por si igualmente salta P2002 desde Prisma
+    if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+      return res
+        .status(400)
+        .json({ error: "El correo ya está registrado" });
+    }
+
+    return res
+      .status(500)
+      .json({ error: "Error interno en el servidor" });
   }
 });
 
@@ -88,13 +133,12 @@ router.post("/login", async (req, res) => {
         id: usuario.id,
         email: usuario.email,
         nombre: usuario.nombre,
-        rol: usuario.rol || "CLIENTE",
+        rol: usuario.rol,
       },
       process.env.JWT_SECRET || "clave_secreta_dev",
       { expiresIn: "2h" }
     );
 
-    // 🧠 Devolvemos toda la info visible, incluyendo imagen
     const safeUser = {
       id: usuario.id,
       nombre: usuario.nombre,
@@ -128,7 +172,7 @@ router.get("/me", authMiddleware, async (req, res) => {
         rol: true,
         telefono: true,
         localidad: true,
-        imagen: true, // 👈 incluimos la imagen
+        imagen: true,
       },
     });
 
@@ -141,7 +185,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 });
 
 // ============================================================
-// ✏️ Actualizar datos del usuario (incluye imagen y localidad)
+// ✏️ Actualizar datos del usuario
 // ============================================================
 router.put("/update", authMiddleware, async (req, res) => {
   try {
@@ -152,12 +196,16 @@ router.put("/update", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "No tienes permiso para editar este perfil" });
 
     const usuario = await prisma.usuario.update({
-      where: { id: Number(id) },
-      data: { nombre, email, telefono, localidad, imagen },
-    });
-// eslint-disable-next-line no-unused-vars
-    const { password, ...safeUser } = usuario;
-    res.json({ message: "✅ Datos actualizados correctamente", usuario: safeUser });
+     where: { id: Number(id) },
+    data: { nombre, email, telefono, localidad, imagen },
+});
+
+// Omitimos password de la respuesta
+const { password: _password, ...safeUser } = usuario;
+void _password;
+
+res.json({ message: "✅ Datos actualizados correctamente", usuario: safeUser });
+
   } catch (error) {
     console.error("❌ Error en /update:", error);
     res.status(500).json({ error: "Error en el servidor" });
@@ -165,7 +213,7 @@ router.put("/update", authMiddleware, async (req, res) => {
 });
 
 // ============================================================
-// 🔒 Cambiar contraseña real
+// 🔒 Cambiar contraseña
 // ============================================================
 router.put("/cambiar-password", authMiddleware, async (req, res) => {
   try {

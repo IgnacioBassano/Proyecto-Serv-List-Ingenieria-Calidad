@@ -20,7 +20,10 @@ function verificarToken(req, res, next) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "clave_secreta_dev");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "clave_secreta_dev"
+    );
     req.user = decoded;
     next();
   } catch (error) {
@@ -52,7 +55,13 @@ const imagenPorCategoria = {
 // 🔍 Buscar servicios
 // =============================
 app.get("/api/servicios", async (req, res) => {
-  const { categoria = "", ubicacion = "", q = "", usuarioId = "", servicioId = "" } = req.query;
+  const {
+    categoria = "",
+    ubicacion = "",
+    q = "",
+    usuarioId = "",
+    servicioId = "",
+  } = req.query;
 
   try {
     let where = {};
@@ -63,7 +72,8 @@ app.get("/api/servicios", async (req, res) => {
       const servicio = await prisma.servicio.findUnique({
         where: { id: Number(servicioId) },
       });
-      if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+      if (!servicio)
+        return res.status(404).json({ error: "Servicio no encontrado" });
       where.usuarioId = servicio.usuarioId;
     }
 
@@ -109,7 +119,8 @@ app.get("/api/servicios/mios", verificarToken, async (req, res) => {
 // 🧑‍🔧 Obtener servicio por ID
 app.get("/api/servicios/:id", async (req, res) => {
   const id = Number(req.params.id);
-  if (!id || isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+  if (!id || isNaN(id))
+    return res.status(400).json({ error: "ID inválido" });
 
   try {
     const servicio = await prisma.servicio.findUnique({
@@ -121,13 +132,17 @@ app.get("/api/servicios/:id", async (req, res) => {
       },
     });
 
-    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+    if (!servicio)
+      return res.status(404).json({ error: "Servicio no encontrado" });
 
     // 🔹 Convertimos createdAt de reseñas a string ISO
     if (servicio.resenas?.length) {
-      servicio.resenas = servicio.resenas.map(r => ({
+      servicio.resenas = servicio.resenas.map((r) => ({
         ...r,
-        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt
+        createdAt:
+          r.createdAt instanceof Date
+            ? r.createdAt.toISOString()
+            : r.createdAt,
       }));
     }
 
@@ -142,23 +157,35 @@ app.get("/api/servicios/:id", async (req, res) => {
 // ✏️ Crear servicio
 // =============================
 app.post("/api/servicios", verificarToken, async (req, res) => {
-  const { titulo, categoria, ubicacion, comentario, imagen, email, descripcion, items } = req.body;
+  const {
+    titulo,
+    categoria,
+    ubicacion,
+    comentario,
+    imagen,
+    email,
+    descripcion,
+    items,
+  } = req.body;
 
   // ✅ Validar campos obligatorios (CP1 y CP2)
   if (!titulo || !categoria || !ubicacion || !comentario) {
-    return res.status(400).json({ error: "Campos obligatorios: título, categoría, ubicación y comentario" });
+    return res.status(400).json({
+      error: "Campos obligatorios: título, categoría, ubicación y comentario",
+    });
   }
 
-// ✅ Validar formato de imagen o URL (CP3)
-if (
-  imagen &&
-  !/^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i.test(imagen) && // URL válida
-  !/\.(jpg|jpeg|png|gif)$/i.test(imagen) // archivo local válido
-) {
-  return res.status(400).json({
-    error: "Formato de imagen no válido. Solo se permiten imágenes JPG, JPEG, PNG o GIF, ya sea por archivo o URL.",
-  });
-}
+  // ✅ Validar formato de imagen o URL (CP3)
+  if (
+    imagen &&
+    !/^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i.test(imagen) && // URL válida
+    !/\.(jpg|jpeg|png|gif)$/i.test(imagen) // archivo local válido
+  ) {
+    return res.status(400).json({
+      error:
+        "Formato de imagen no válido. Solo se permiten imágenes JPG, JPEG, PNG o GIF, ya sea por archivo o URL.",
+    });
+  }
 
   // ✅ Limpiar texto de posibles caracteres peligrosos (CP4)
   const cleanTitulo = titulo.replace(/[<>]/g, "").trim();
@@ -172,7 +199,10 @@ if (
         ubicacion,
         comentario: cleanComentario,
         descripcion: descripcion || "",
-        imagen: imagen || imagenPorCategoria[categoria] || "/assets/placeholder.jpg",
+        imagen:
+          imagen ||
+          imagenPorCategoria[categoria] ||
+          "/assets/placeholder.jpg",
         email: email || req.user.email,
         rating: 4.0,
         usuarioId: Number(req.user.id),
@@ -182,7 +212,9 @@ if (
       },
     });
 
-    res.status(201).json({ message: "✅ Servicio creado correctamente", servicio: creado });
+    res
+      .status(201)
+      .json({ message: "✅ Servicio creado correctamente", servicio: creado });
   } catch (err) {
     console.error("❌ Error al crear servicio:", err);
     res.status(500).json({ error: "No se pudo crear el servicio" });
@@ -198,14 +230,19 @@ app.put("/api/servicios/:id", verificarToken, async (req, res) => {
     const { titulo, categoria, ubicacion, comentario } = req.body;
 
     if (!titulo || !categoria || !ubicacion || !comentario) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios" });
     }
 
     const servicio = await prisma.servicio.findUnique({ where: { id } });
-    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+    if (!servicio)
+      return res.status(404).json({ error: "Servicio no encontrado" });
 
     if (servicio.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
-      return res.status(403).json({ error: "No tienes permiso para editar este servicio" });
+      return res
+        .status(403)
+        .json({ error: "No tienes permiso para editar este servicio" });
     }
 
     const actualizado = await prisma.servicio.update({
@@ -213,7 +250,10 @@ app.put("/api/servicios/:id", verificarToken, async (req, res) => {
       data: { titulo, categoria, ubicacion, comentario },
     });
 
-    res.json({ message: "✅ Servicio actualizado correctamente", servicio: actualizado });
+    res.json({
+      message: "✅ Servicio actualizado correctamente",
+      servicio: actualizado,
+    });
   } catch (error) {
     console.error("❌ Error al editar servicio:", error);
     res.status(500).json({ error: "Error al editar el servicio" });
@@ -227,10 +267,13 @@ app.delete("/api/servicios/:id", verificarToken, async (req, res) => {
   try {
     const id = Number(req.params.id);
     const servicio = await prisma.servicio.findUnique({ where: { id } });
-    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+    if (!servicio)
+      return res.status(404).json({ error: "Servicio no encontrado" });
 
     if (servicio.usuarioId !== req.user.id && req.user.rol !== "ADMIN") {
-      return res.status(403).json({ error: "No tienes permiso para eliminar este servicio" });
+      return res
+        .status(403)
+        .json({ error: "No tienes permiso para eliminar este servicio" });
     }
 
     await prisma.servicio.delete({ where: { id } });
@@ -247,14 +290,21 @@ app.delete("/api/servicios/:id", verificarToken, async (req, res) => {
 app.post("/api/turnos", async (req, res) => {
   const { nombre, email, fecha, detalle, servicioId } = req.body;
 
-  if (!nombre || !email) return res.status(400).json({ error: "Campos obligatorios: nombre y email." });
-  if (!servicioId) return res.status(400).json({ error: "Falta el ID del servicio asociado." });
+  if (!nombre || !email)
+    return res
+      .status(400)
+      .json({ error: "Campos obligatorios: nombre y email." });
+  if (!servicioId)
+    return res
+      .status(400)
+      .json({ error: "Falta el ID del servicio asociado." });
 
   try {
     const servicio = await prisma.servicio.findUnique({
       where: { id: Number(servicioId) },
     });
-    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado." });
+    if (!servicio)
+      return res.status(404).json({ error: "Servicio no encontrado." });
 
     const turno = await prisma.turno.create({
       data: {
@@ -270,7 +320,7 @@ app.post("/api/turnos", async (req, res) => {
       message: "✅ Turno creado correctamente",
       turno: {
         ...turno,
-        fecha: turno.fecha ? turno.fecha.toISOString() : null
+        fecha: turno.fecha ? turno.fecha.toISOString() : null,
       },
     });
   } catch (err) {
@@ -284,24 +334,60 @@ app.get("/api/turnos/mios", verificarToken, async (req, res) => {
   try {
     const turnos = await prisma.turno.findMany({
       where: { servicio: { usuarioId: req.user.id } },
-      include: { servicio: { select: { titulo: true, categoria: true, ubicacion: true } } },
+      include: {
+        servicio: {
+          select: { titulo: true, categoria: true, ubicacion: true },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(turnos.map(t => ({
+    res.json(
+      turnos.map((t) => ({
+        id: t.id,
+        nombre: t.nombre,
+        email: t.email,
+        detalle: t.detalle,
+        fecha: t.fecha ? t.fecha.toISOString() : null,
+        estado: t.estado || "pendiente",
+        servicio: t.servicio?.titulo || "Sin servicio",
+        categoria: t.servicio?.categoria,
+        ubicacion: t.servicio?.ubicacion,
+      }))
+    );
+  } catch (error) {
+    console.error("❌ Error al obtener turnos:", error);
+    res.status(500).json({ error: "Error al obtener los turnos" });
+  }
+});
+
+// Obtener turnos reservados por el CLIENTE logueado
+app.get("/api/turnos/reservados", verificarToken, async (req, res) => {
+  try {
+    const turnos = await prisma.turno.findMany({
+      where: { email: req.user.email }, // usamos el email del usuario logueado
+      include: {
+        servicio: {
+          select: { titulo: true, categoria: true, ubicacion: true },
+        },
+      },
+      orderBy: { fecha: "desc" },
+    });
+
+    const data = turnos.map((t) => ({
       id: t.id,
-      nombre: t.nombre,
-      email: t.email,
       detalle: t.detalle,
       fecha: t.fecha ? t.fecha.toISOString() : null,
       estado: t.estado || "pendiente",
       servicio: t.servicio?.titulo || "Sin servicio",
-      categoria: t.servicio?.categoria,
-      ubicacion: t.servicio?.ubicacion,
-    })));
+      categoria: t.servicio?.categoria || "",
+      ubicacion: t.servicio?.ubicacion || "",
+    }));
+
+    res.json(data);
   } catch (error) {
-    console.error("❌ Error al obtener turnos:", error);
-    res.status(500).json({ error: "Error al obtener los turnos" });
+    console.error("❌ Error al obtener turnos reservados:", error);
+    res.status(500).json({ error: "Error al obtener tus turnos reservados" });
   }
 });
 
@@ -327,16 +413,23 @@ app.put("/api/turnos/:id/estado", verificarToken, async (req, res) => {
       data: { estado },
     });
 
-    res.json({ message: "✅ Estado actualizado correctamente", turno: actualizado });
+    res.json({
+      message: "✅ Estado actualizado correctamente",
+      turno: actualizado,
+    });
   } catch (error) {
     console.error("❌ Error al actualizar estado:", error);
-    res.status(500).json({ error: "Error al cambiar el estado del turno" });
+    res
+      .status(500)
+      .json({ error: "Error al cambiar el estado del turno" });
   }
 });
 
 // =============================
 // 🧾 RESEÑAS
 // =============================
+
+// 1) Reseñas de un servicio específico
 app.get("/api/resenas/servicio/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -345,33 +438,61 @@ app.get("/api/resenas/servicio/:id", async (req, res) => {
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(resenas.map(r => ({
-      ...r,
-      createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt
-    })));
+    res.json(
+      resenas.map((r) => ({
+        ...r,
+        createdAt:
+          r.createdAt instanceof Date
+            ? r.createdAt.toISOString()
+            : r.createdAt,
+      }))
+    );
   } catch (error) {
     console.error("❌ Error al obtener reseñas:", error);
     res.status(500).json({ error: "Error al obtener reseñas" });
   }
 });
 
-app.post("/api/resenas", async (req, res) => {
+// 2) Crear nueva reseña (cliente logueado)
+app.post("/api/resenas", verificarToken, async (req, res) => {
   try {
-    const { nombre, email, comentario, puntaje, servicioId } = req.body;
+    const { servicioId, puntaje, comentario } = req.body;
 
-    if (!nombre || !email || !comentario || !puntaje || !servicioId) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+    // Solo estos 3 campos son obligatorios
+    if (!servicioId || !puntaje || !comentario) {
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios" });
     }
 
-    const servicio = await prisma.servicio.findUnique({ where: { id: Number(servicioId) } });
-    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+    const puntajeNum = Number(puntaje);
+    if (isNaN(puntajeNum) || puntajeNum < 1 || puntajeNum > 5) {
+      return res
+        .status(400)
+        .json({ error: "El puntaje debe estar entre 1 y 5" });
+    }
+
+    const servicio = await prisma.servicio.findUnique({
+      where: { id: Number(servicioId) },
+    });
+    if (!servicio)
+      return res.status(404).json({ error: "Servicio no encontrado" });
+
+    // Usuario logueado
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.user.id },
+      select: { nombre: true, email: true },
+    });
+
+    if (!usuario)
+      return res.status(404).json({ error: "Usuario no encontrado" });
 
     const nuevaResena = await prisma.resena.create({
       data: {
-        nombre,
-        email,
+        nombre: usuario.nombre,
+        email: usuario.email,
         comentario,
-        puntaje: Number(puntaje),
+        puntaje: puntajeNum,
         servicioId: Number(servicioId),
       },
     });
@@ -388,8 +509,14 @@ app.post("/api/resenas", async (req, res) => {
 
     res.status(201).json({
       message: "✅ Reseña enviada correctamente y rating actualizado",
-      resena: { ...nuevaResena, createdAt: nuevaResena.createdAt.toISOString() },
-      nuevoRating: promedio._avg.puntaje,
+      resena: {
+        ...nuevaResena,
+        createdAt:
+          nuevaResena.createdAt instanceof Date
+            ? nuevaResena.createdAt.toISOString()
+            : nuevaResena.createdAt,
+      },
+      nuevoRating: promedio._avg.puntaje || 0,
     });
   } catch (error) {
     console.error("❌ Error al crear reseña:", error);
@@ -397,15 +524,18 @@ app.post("/api/resenas", async (req, res) => {
   }
 });
 
+// 3) Reseñas RECIBIDAS por el prestador logueado
 app.get("/api/resenas/mias", verificarToken, async (req, res) => {
   try {
     const resenas = await prisma.resena.findMany({
       where: { servicio: { usuarioId: req.user.id } },
-      include: { servicio: { select: { titulo: true, categoria: true } } },
+      include: {
+        servicio: { select: { titulo: true, categoria: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(resenas.map(r => ({
+    const resenasFormateadas = resenas.map((r) => ({
       id: r.id,
       servicio: r.servicio?.titulo || "Sin servicio",
       categoria: r.servicio?.categoria || "",
@@ -413,29 +543,7 @@ app.get("/api/resenas/mias", verificarToken, async (req, res) => {
       email: r.email,
       comentario: r.comentario,
       puntaje: r.puntaje,
-      fecha: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
-    })));
-  } catch (error) {
-    console.error("❌ Error al obtener reseñas del prestador:", error);
-    res.status(500).json({ error: "Error al obtener reseñas" });
-  }
-});app.get("/api/resenas/mias", verificarToken, async (req, res) => {
-  try {
-    const resenas = await prisma.resena.findMany({
-      where: { servicio: { usuarioId: req.user.id } },
-      include: { servicio: { select: { titulo: true, categoria: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-
-    const resenasFormateadas = resenas.map(r => ({
-      id: r.id,
-      servicio: r.servicio?.titulo || "Sin servicio",
-      categoria: r.servicio?.categoria || "",
-      nombre: r.nombre,
-      email: r.email,
-      comentario: r.comentario,
-      puntaje: r.puntaje,
-      fecha: r.createdAt ? new Date(r.createdAt).toISOString() : null // ✅ clave
+      fecha: r.createdAt ? new Date(r.createdAt).toISOString() : null,
     }));
 
     res.json(resenasFormateadas);
@@ -445,12 +553,37 @@ app.get("/api/resenas/mias", verificarToken, async (req, res) => {
   }
 });
 
+// 4) Reseñas ENVIADAS por el cliente logueado
+app.get("/api/resenas/enviadas", verificarToken, async (req, res) => {
+  try {
+    const resenas = await prisma.resena.findMany({
+      where: { email: req.user.email },
+      include: { servicio: { select: { titulo: true, categoria: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const data = resenas.map((r) => ({
+      id: r.id,
+      servicio: r.servicio?.titulo || "Sin servicio",
+      categoria: r.servicio?.categoria || "",
+      comentario: r.comentario,
+      puntaje: r.puntaje,
+      fecha: r.createdAt ? r.createdAt.toISOString() : null,
+    }));
+
+    res.json(data);
+  } catch (error) {
+    console.error("❌ Error obteniendo reseñas enviadas:", error);
+    res.status(500).json({ error: "Error al obtener reseñas enviadas" });
+  }
+});
 
 // =============================
 // 🚀 Servidor y frontend
 // =============================
 app.get("*", (req, res) => {
-  if (req.path.startsWith("/api/")) return res.status(404).json({ error: "Ruta API no encontrada" });
+  if (req.path.startsWith("/api/"))
+    return res.status(404).json({ error: "Ruta API no encontrada" });
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
