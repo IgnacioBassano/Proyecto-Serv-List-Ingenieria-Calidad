@@ -587,6 +587,11 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Serv-list ejecutándose en http://localhost:${PORT}`);
-});
+// Solo arrancamos el servidor si se ejecuta directamente con `node server.js`
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Serv-list ejecutándose en http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;

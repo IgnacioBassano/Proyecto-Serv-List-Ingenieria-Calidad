@@ -19,6 +19,7 @@ module.exports = defineConfig([
       "semi": ["error", "always"],
       "quotes": ["warn", "double"],
       "eqeqeq": "warn",
+      "camelcase": ["warn", {"properties": "always"}]
     },
   },
   // ✅ Frontend: navegador
@@ -26,6 +27,17 @@ module.exports = defineConfig([
     files: ["public/**/*.js"],
     languageOptions: {
       globals: globals.browser,
+    },
+  },
+  // ⭐ CONFIG para JEST (evita todos tus errores)
+  {
+    files: ["tests/**/*.js"],
+    languageOptions: {
+      globals: {
+        test: "readonly",
+        expect: "readonly",
+        describe: "readonly",
+      },
     },
   },
 ]);
